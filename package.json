@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "jslint **/*.js",
-    "test": "tape tests/**/*.js",
+    "test": "NODE_ENV=test tape tests/**/*.js",
     "start": "nodemon index.js"
   },
   "repository": {
