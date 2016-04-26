@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "lint": "jslint **/*.js",
-    "test": "tape tests/**/*.js",
+    "unit-tests": "tape tests/**/*.js",
+    "test-local": "nyc npm run unit-tests",
+    "test": "npm run test-local && nyc report --reporter=text-lcov | coveralls",
     "start": "nodemon index.js"
   },
   "repository": {
@@ -28,7 +30,9 @@
   "homepage": "https://github.com/StephaneTrebel/semverse#readme",
   "devDependencies": {
     "blue-tape": "^0.2.0",
+    "coveralls": "^2.11.9",
     "js-beautify": "^1.6.2",
+    "nyc": "^6.4.0",
     "sinon": "^1.17.3",
     "tape": "^4.5.1"
   },
