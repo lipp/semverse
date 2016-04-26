@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/StephaneTrebel/semverse.svg?branch=master)](https://travis-ci.org/StephaneTrebel/semverse)
+[![Coverage Status](https://coveralls.io/repos/github/StephaneTrebel/semverse/badge.svg?branch=master)](https://coveralls.io/github/StephaneTrebel/semverse?branch=master)
 
 # semverse
 A universe that follows SemVer constraints
