@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/StephaneTrebel/semverse.svg?branch=master)](https://travis-ci.org/StephaneTrebel/semverse)
+
 # semverse
 A universe that follows SemVer constraints
 # So what is this about ?
