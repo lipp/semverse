@@ -4,8 +4,8 @@
   "description": "A small universe, SemVer based",
   "main": "index.js",
   "scripts": {
-    "lint": "jslint **/*.js",
-    "test": "NODE_ENV=test tape tests/**/*.js",
+    "lint": "jslint **/*/*.js",
+    "test": "NODE_ENV=test tape tests/**/*/*.js",
     "start": "nodemon index.js"
   },
   "repository": {

@@ -1,6 +1,6 @@
 'use strict';
 module.exports = {
-    service : {
+    service: {
         port: 9100,
         middlewareList: [
             'swaggerUI',
@@ -8,4 +8,3 @@ module.exports = {
         ]
     }
 };
-

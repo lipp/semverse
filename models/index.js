@@ -12,8 +12,8 @@ const spec = require('../../api/swagger.json');
 function init(_, config, log) {
     log('info', 'Initializing swaggerUiMW');
     return swaggerUiMW(spec, {
-         apiDocs: _.get('apiDocs', config, '/api-docs'),
-         swaggerUI: _.get('swaggerUI', config, '/docs')
+        apiDocs: _.get('apiDocs', config, '/api-docs'),
+        swaggerUI: _.get('swaggerUI', config, '/docs')
     });
 }
 

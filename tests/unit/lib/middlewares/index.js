@@ -2,16 +2,19 @@
 
 const test = require("blue-tape");
 const m = require("../../../../lib/middlewares/index");
-const defaultFn = () => null;
+const nullFn = () => null;
+const lodash = require("lodash/fp");
 
 test("Middleware manager", (t) => {
     test("getPort() ", (t) => {
         t.equal(typeof m.getPort, "function", "should be a function");
-        t.throws(() => m.getPort(), "should reject an empty call");
-        t.doesNotThrow(() => m.getPort({
-                get: () => {}
-            }),
-            "should call the 'get' utils function");
+        t.throws(() => m.getPort(), "should throw when given an invalid context");
+        t.equal(m.getPort({
+                get: (a, b) => b[a]
+            }, {
+                port: 1
+            }), 1,
+            "should get the config port when given valid context");
         t.end();
     });
     test("mwInit()", (t) => {
@@ -21,16 +24,12 @@ test("Middleware manager", (t) => {
     test("mwInit()", (t) =>
         t.shouldFail(m.mwInit(), TypeError, "should reject empty calls"));
     test("mwInit()", (t) =>
-        m.mwInit({
-            get: defaultFn,
-            flow: () => () => [Promise.resolve()],
-            map: defaultFn,
-            tap: defaultFn
+        m.mwInit(lodash.defaults({}, lodash, { requireModule: a => a }), {
+            use: nullFn
         }, {
-            use: defaultFn
-        }, {}, defaultFn)
-        //.then(), {}, "should work work by using expected utils functions");
-        //t.end();
+            middlewareList: [() => 'A', () => 'B']
+        }, nullFn)
+        .then((result) => t.equal(result, true, "should initialize middlewares"))
     );
     t.end();
 });
