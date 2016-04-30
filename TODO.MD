@@ -3,4 +3,4 @@
 3. Utiliser babel et passer en es2015
 4. Script de déploiement heroku/serveur local
 5. Sequelize
-
+6. Remplacer `config` par `state` ? Après tout l'Etat n'est qu'une config qui a commencé à vivre à travers les modules, non ?
