@@ -1,48 +1,57 @@
 {
-  "name": "semverse",
-  "version": "1.0.0",
-  "description": "A small universe, SemVer based",
-  "main": "index.js",
-  "scripts": {
-    "lint": "jslint **/*.js",
-    "unit-tests": "tape tests/**/*/*.js",
-    "test-local": "nyc npm run unit-tests",
-    "test": "npm run test-local && nyc report --reporter=text-lcov | coveralls",
-    "start": "nodemon index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StephaneTrebel/semverse.git"
-  },
-  "keywords": [
-    "semverse",
-    "semver",
-    "rest",
-    "api",
-    "swagger",
-    "sequelize"
-  ],
-  "author": "Stéphane Trébel",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/StephaneTrebel/semverse/issues"
-  },
-  "homepage": "https://github.com/StephaneTrebel/semverse#readme",
-  "devDependencies": {
-    "blue-tape": "^0.2.0",
-    "coveralls": "^2.11.9",
-    "js-beautify": "^1.6.2",
-    "nyc": "^6.4.0",
-    "sinon": "^1.17.3",
-    "tape": "^4.5.1"
-  },
-  "dependencies": {
-    "express": "^4.13.4",
-    "lodash": "^4.7.0",
-    "nodemon": "^1.9.1",
-    "sequelize": "^3.20.0",
-    "swagger-router": "^0.4.1",
-    "swagger-tools": "^0.10.1",
-    "swagger-ui": "^2.1.4"
-  }
+    "name": "semverse",
+    "version": "1.0.0",
+    "description": "A small universe, SemVer based",
+    "main": "index.js",
+    "config": {
+        "nyc": "--all --check-coverage --lines 100"
+    },
+    "scripts": {
+        "lint": "jslint src/**/*.js tests/**/*.js",
+        "unit-tests": "tape tests/**/*/*.js",
+        "test": "nyc --reporter=text $npm_package_config_nyc npm run unit-tests",
+        "test-ci": "nyc --reporter=text-lcov $npm_package_config_nyc npm run unit-tests | coveralls",
+        "start": "nodemon index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/StephaneTrebel/semverse.git"
+    },
+    "keywords": [
+        "semverse",
+        "semver",
+        "rest",
+        "api",
+        "swagger",
+        "sequelize"
+    ],
+    "author": "Stéphane Trébel",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/StephaneTrebel/semverse/issues"
+    },
+    "homepage": "https://github.com/StephaneTrebel/semverse#readme",
+    "devDependencies": {
+        "blue-tape": "^0.2.0",
+        "coveralls": "^2.11.9",
+        "js-beautify": "^1.6.2",
+        "nyc": "^6.4.0",
+        "sinon": "^1.17.3",
+        "tape": "^4.5.1"
+    },
+    "dependencies": {
+        "express": "^4.13.4",
+        "lodash": "^4.7.0",
+        "nodemon": "^1.9.1",
+        "sequelize": "^3.20.0",
+        "swagger-router": "^0.4.1",
+        "swagger-tools": "^0.10.1",
+        "swagger-ui": "^2.1.4"
+    },
+    "nyc": {
+        "exclude": [
+            "coverage",
+            "tests"
+        ]
+    }
 }
