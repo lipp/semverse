@@ -29,12 +29,12 @@ function requireTestedModule(testFileName) {
  * @param   {String}    middleware      Tested module name
  * @return  {Mixed}                     Module exports
  */
-function requireMiddleware(middleware {
-    return require(path.resolve(__dirname, middleware);
+function requireMiddleware(middleware) {
+    return require(path.resolve(__dirname, middleware));
 }
 
 module.exports = {
-    requireFromProjectRoot: requireFromProjectRoot,
-    requireTestedModule: requireTestedModule
+    requireFromProjectRoot,
+    requireTestedModule,
+    requireMiddleware
 };
-

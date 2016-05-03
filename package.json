@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "jslint **/*.js",
-    "unit-tests": "tape tests/**/*.js",
+    "unit-tests": "tape tests/**/*/*.js",
     "test-local": "nyc npm run unit-tests",
     "test": "npm run test-local && nyc report --reporter=text-lcov | coveralls",
     "start": "nodemon index.js"

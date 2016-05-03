@@ -1,8 +1,10 @@
 "use strict";
 
+const utilsLib = require('../utils');
+
 module.exports = function factory(utilsRef, configRef, logRef) {
 
-    const { flow, get, map, tap } = utilsRef;
+    const {curry, flow, get, map, tap} = utilsRef;
     const config = configRef;
     const log = logRef;
 
@@ -13,9 +15,7 @@ module.exports = function factory(utilsRef, configRef, logRef) {
          * @param  {Function}           middleware  Middleware function
          * @return {Boolean}            True on success
          */
-        useMiddleware(app, middleware) {
-            return app.use(middleware);
-        },
+        useMiddleware: curry((app, middleware) => app.use(middleware)),
 
         /*
          * Initialize a middleware
@@ -26,7 +26,7 @@ module.exports = function factory(utilsRef, configRef, logRef) {
          * @return {Promise.Boolean}    True on success
          */
         initMiddleware(middleware) {
-            return middleware(utils, config, log);
+            return middleware(utilsRef, config, log);
         },
 
         /*
@@ -51,19 +51,19 @@ module.exports = function factory(utilsRef, configRef, logRef) {
                 // Log it
                 tap((list) => log("info", "Middleware list: ", list)),
                 // Require everything
-                map(requireModule),
+                map(utilsLib.requireModule),
                 // Call all middlewares factories to create middleware
                 // functions
                 map(exports.initMiddleware),
                 // Wait for all initializations to resolve
                 Promise.all,
-                p => p
-                .then(map(exports.useMiddleware))
-                .then(() => log("info", "Successfully intitialized middlewares"))
-                .then(() => true)
-                .catch((err) => log("error",
-                    "Error while initializing middlewares: ",
-                    err.stack))
+                (p) => p
+                    .then(map(exports.useMiddleware(app)))
+                    .then(() => log("info", "Successfully intitialized middlewares"))
+                    .then(() => true)
+                    .catch((err) => log("error",
+                            "Error while initializing middlewares: ",
+                            err.stack))
             )(config);
         },
 
@@ -87,15 +87,14 @@ module.exports = function factory(utilsRef, configRef, logRef) {
             //});
             const port = exports.getPort();
             log("info", "Starting service...");
-            return mwInit(app)
+            return exports.mwInit(app)
                 .then(() => app.listen(
                     port,
                     () => log("info", `Service successfully started on port ${port}`)
                 ))
                 .catch((err) => log("error",
-                    "Fatal error while starting the service: ",
-                    err.stack));
+                        "Fatal error while starting the service: ",
+                        err.stack));
         }
     };
-}
-exports = module.exports;
+};

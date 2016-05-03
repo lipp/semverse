@@ -15,5 +15,4 @@ module.exports = function init(utils, config, log) {
         apiDocs: utils.get('apiDocs', config, '/api-docs'),
         swaggerUI: utils.get('swaggerUI', config, '/docs')
     });
-}
-
+};
