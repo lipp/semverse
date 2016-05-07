@@ -2,32 +2,33 @@
 
 const utilsLib = require('../utils');
 
-module.exports = function factory(utilsRef, configRef, logRef) {
+/*
+ * Use a middlewaree
+ * @param  {Object}             app         App reference
+ * @param  {Function}           middleware  Middleware function
+ * @return {Boolean}            True on success
+ */
+exports.useMiddleware = curry((app, middleware) => app.use(middleware));
+
+/*
+ * Initialize a middleware
+ * @param  {Object}             utils           Utils collection
+ * @param  {Object}             config          Config reference
+ * @param  {Function}           log             Log Function
+ * @param  {Function}           middleware      Middleware function
+ * @return {Promise.Boolean}    True on success
+ */
+exports.initMiddleware = function initMiddleware(utilsRef, config, log, middleware) {
+    return middleware(utilsRef, config, log);
+};
+
+exports.stateful = function factory(utilsRef, configRef, logRef) {
 
     const {curry, flow, get, map, tap} = utilsRef;
     const config = configRef;
     const log = logRef;
 
     return {
-        /*
-         * Use a middleware
-         * @param  {Object}             app         App reference
-         * @param  {Function}           middleware  Middleware function
-         * @return {Boolean}            True on success
-         */
-        useMiddleware: curry((app, middleware) => app.use(middleware)),
-
-        /*
-         * Initialize a middleware
-         * @param  {Object}             utils           Utils collection
-         * @param  {Object}             config          Config reference
-         * @param  {Function}           log             Log Function
-         * @param  {Function}           middleware      Middleware function
-         * @return {Promise.Boolean}    True on success
-         */
-        initMiddleware(middleware) {
-            return middleware(utilsRef, config, log);
-        },
 
         /*
          * Config port getter. Default is 9100
