@@ -1,7 +1,7 @@
-'use strict';
+//'use strict';
 
-const swaggerUI = require('swagger-tools/middleware/swagger-ui');
-const spec = require('../../api/swagger.json');
+//const swaggerUI = require('swagger-tools/middleware/swagger-ui');
+//const spec = require('../../api/swagger.json');
 
 /* Initialize Swagger UI middleware
  * @param  {Object}     utils       Utility functions library reference
@@ -9,10 +9,10 @@ const spec = require('../../api/swagger.json');
  * @param  {Object}     log         Log function reference
  * @return {Function}               Swagger UI middleware function
  */
-module.exports = function init(utils, config, log) {
-    log('info', 'Initializing swaggerUI');
-    return swaggerUI(spec, {
-        apiDocs: utils.get('apiDocs', config, '/api-docs'),
-        swaggerUI: utils.get('swaggerUI', config, '/docs')
-    });
-};
+//module.exports = function init(utils, config, log) {
+    //log('info', 'Initializing swaggerUI');
+    //return swaggerUI(spec, {
+        //apiDocs: utils.get('apiDocs', config, '/api-docs'),
+        //swaggerUI: utils.get('swaggerUI', config, '/docs')
+    //});
+//};
