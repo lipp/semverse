@@ -4,14 +4,16 @@
     "description": "A small universe, SemVer based",
     "main": "index.js",
     "config": {
-        "nyc": "--all --check-coverage --lines 100"
+        "nyc": "--all --check-coverage --lines 100",
+        "path": "NODE_LIB=./",
+        "envTest": "NODE_ENV=test $npm_package_config_path"
     },
     "scripts": {
-        "lint": "jslint src/**/*.js tests/**/*.js",
+        "lint": "jslint src/*.js src/**/*.js tests/**/*.js",
         "unit-tests": "tape tests/**/*/*.js",
         "test": "nyc --reporter=text $npm_package_config_nyc npm run unit-tests",
         "test-ci": "nyc --reporter=text-lcov $npm_package_config_nyc npm run unit-tests | coveralls",
-        "start": "nodemon index.js"
+        "start": "nodemon src/index.js"
     },
     "repository": {
         "type": "git",

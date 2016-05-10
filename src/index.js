@@ -1,15 +1,29 @@
-//'use strict';
+"use strict";
 
-//const _ = require('lodash/fp');
-//const app = require('express')();
+const express = require("express");
 
-//const configService = _.get('service', require('./config'), {});
-//const start = require('./lib/middlewares');
+const config = require("config");
+const util = require("lib/util");
+const start = require("lib/middlewares");
 
-//// Main execution
-//// try {
-//start(_, app, configService, console.log);
-////} catch (error) {
-////  log('error', 'An unexpected error happened:', error.toString());
-//// Capture error stack ?
-////}
+function main() {
+    const log = util.getLogger();
+    try {
+        log("info", "Starting service...");
+        const app = express();
+        const serviceConfig = config.getService();
+        return start(app, serviceConfig, util);
+    } catch (error) {
+        log(
+            "critical",
+            "A critical error happened while starting the service:",
+            error
+        );
+    }
+}
+
+exports.main = main;
+
+if (process.env.NODE_ENV !== "test") {
+    main();
+}
