@@ -1,58 +1,58 @@
 "use strict";
 
-const lodash = require("lodash");
-const test = require("blue-tape");
-const proxyquire = require("proxyquire");
+const path = require("path");
 
-const moduleName = "./utils";
+const {
+    // Primary test functions
+    testModuleBlock,
+    prepareStubs,
 
-function nullFn() {
-    return null;
-}
+    // Helpers
+    nullFn,
+    nullFnHO,
+    throwFn,
+    throwFnHO,
+    resolveFn,
 
-function nullFnHO() {
-    return () => nullFn;
-}
+    // Dependencies to stub
+    express,
+    config,
+    utils,
+    middlewares
+} = require("./lib/test-helpers");
 
-function throwFn() {
-    throw new Error("TestError");
-}
+const m = prepareStubs(path.resolve(__dirname, "./index"));
 
-function rejectFn() {
-    return Promise.reject(new Error("TestError"));
-}
-
-function stubMe(fnName) {
-    return function stubThis() {
-        throw new Error("Please stub function " + fnName);
-    };
-}
-
-const config = "./config";
-const start = "./lib/middlewares";
-
-const defaultStubs = {
-    express: stubMe("express"),
-    [config]: {
-        getService: stubMe("getService")
-    },
-    [start]: stubMe("start")
-};
-
-function prepareStubs(customStubs) {
-    return proxyquire(moduleName, lodash.merge({}, defaultStubs, customStubs));
-}
-
-test("Utils module", function(t) {
-    test("getLogger()", function(t) {
-        test("should throw an error", (t) => {
-            t.throws(() =>
-                prepareStubs({})
-                .getLogger()
-            );
-            t.end();
+testModuleBlock("Service starter", (testBlock) => {
+    testBlock("main()", (unitTest) => {
+        unitTest("when an error happens", (t) => {
+            m({
+                    [utils]: {
+                        getLogger: throwFnHO
+                    }
+                })
+                .main()
+                .then(() => t.fail("should have returned a rejected Promise"))
+                .catch(() => t.pass("should return a rejected Promise"))
+                .then(t.end);
         });
-        t.end();
+        unitTest("when no errors happen", (t) => {
+            m({
+                    [express]: nullFn,
+                    [config]: {
+                        getService: nullFn
+                    },
+                    [utils]: {
+                        getLogger: nullFnHO
+                    },
+                    [middlewares]: {
+                        start: resolveFn
+                    }
+                })
+                .main()
+                .then(() => t.pass("should return a resolved Promise"))
+                .catch(() => t.fail("should not have thrown an error"))
+                .then(t.end);
+        });
     });
-    t.end();
 });
