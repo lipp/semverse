@@ -12,7 +12,7 @@ const middlewares = require(path.resolve(__dirname, "./lib/middlewares"));
  *
  * @return {Promise}        Fulfilled when service is started
  **/
-function main() {
+exports.main = function main() {
     try {
         const logInfo = utils.getLogger("info");
         const logCritical = utils.getLogger(
@@ -28,11 +28,9 @@ function main() {
     } catch (error) {
         return Promise.reject(`Fatal error: ${error}`);
     }
-}
+};
 
-exports.main = main;
-
-/* istanbul ignore else */
+/* istanbul ignore if */
 if (process.env.NODE_ENV !== "test") {
-    main();
+    exports.main();
 }

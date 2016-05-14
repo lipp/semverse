@@ -1,61 +1,58 @@
 {
-  "name": "semverse",
-  "version": "1.0.0",
-  "description": "A small universe, SemVer based",
-  "main": "index.js",
-  "config": {
-    "nyc": "--all --check-coverage --lines 100",
-    "path": "NODE_LIB=./",
-    "envTest": "NODE_ENV=test $npm_package_config_path"
-  },
-  "scripts": {
-    "lint": "jslint src/*.js src/**/*.js tests/**/*.js",
-    "unit-tests-old": "tape src/**/*.spec.js | tap-spec",
-    "unit-tests": "tape src/index.spec.js | tap-spec",
-    "test": "nyc --reporter=html $npm_package_config_nyc npm run unit-tests",
-    "test-ci": "nyc --reporter=text-lcov $npm_package_config_nyc npm run unit-tests | coveralls",
-    "start": "nodemon src/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StephaneTrebel/semverse.git"
-  },
-  "keywords": [
-    "semverse",
-    "semver",
-    "rest",
-    "api",
-    "swagger",
-    "sequelize"
-  ],
-  "author": "Stéphane Trébel",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/StephaneTrebel/semverse/issues"
-  },
-  "homepage": "https://github.com/StephaneTrebel/semverse#readme",
-  "devDependencies": {
-    "coveralls": "^2.11.9",
-    "faucet": "0.0.1",
-    "js-beautify": "^1.6.2",
-    "nyc": "^6.4.0",
-    "proxyquire": "^1.7.9",
-    "sinon": "^1.17.3",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.5.1"
-  },
-  "dependencies": {
-    "express": "^4.13.4",
-    "lodash": "^4.7.0",
-    "sequelize": "^3.20.0",
-    "swagger-router": "^0.4.1",
-    "swagger-tools": "^0.10.1",
-    "swagger-ui": "^2.1.4"
-  },
-  "nyc": {
-    "exclude": [
-      "coverage",
-      "tests"
-    ]
-  }
+    "name": "semverse",
+    "version": "1.0.0",
+    "description": "A small universe, SemVer based",
+    "main": "index.js",
+    "config": {},
+    "scripts": {
+        "lint": "jslint 'src/**/*.js' 'tests/**/*.js'",
+        "unit-tests": "tape 'src/**/*.spec.js' | tap-spec",
+        "test": "NODE_ENV=test nyc --reporter=html --all npm run unit-tests",
+        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run unit-tests | coveralls",
+        "start": "nodemon src/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/StephaneTrebel/semverse.git"
+    },
+    "keywords": [
+        "semverse",
+        "semver",
+        "rest",
+        "api",
+        "swagger",
+        "sequelize"
+    ],
+    "author": "Stéphane Trébel",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/StephaneTrebel/semverse/issues"
+    },
+    "homepage": "https://github.com/StephaneTrebel/semverse#readme",
+    "devDependencies": {
+        "coveralls": "^2.11.9",
+        "faucet": "0.0.1",
+        "js-beautify": "^1.6.2",
+        "nyc": "^6.4.0",
+        "proxyquire": "^1.7.9",
+        "sinon": "^1.17.3",
+        "tap-spec": "^4.1.1",
+        "tape": "^4.5.1"
+    },
+    "dependencies": {
+        "express": "^4.13.4",
+        "lodash": "^4.7.0",
+        "sequelize": "^3.20.0",
+        "swagger-router": "^0.4.1",
+        "swagger-tools": "^0.10.1",
+        "swagger-ui": "^2.1.4"
+    },
+    "nyc": {
+        "exclude": [
+            "coverage",
+            "src/index.spec.js",
+            "'**/*.spec.js'",
+            "tests"
+        ]
+    }
 }

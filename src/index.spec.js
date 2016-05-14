@@ -19,7 +19,7 @@ const {
     config,
     utils,
     middlewares
-} = require("./lib/test-helpers");
+} = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareStubs(path.resolve(__dirname, "./index"));
 
@@ -51,7 +51,7 @@ testModuleBlock("Service starter", (testBlock) => {
                 })
                 .main()
                 .then(() => t.pass("should return a resolved Promise"))
-                .catch(() => t.fail("should not have thrown an error"))
+                .catch(() => t.fail("should have returned a resolved Promise"))
                 .then(t.end);
         });
     });

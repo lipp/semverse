@@ -95,32 +95,32 @@ exports.resolveFn = function resolveFn(value) {
  * @param  {String} value Resolved value
  * @return {Function} Function that return a resolved Promise with given value
  */
-exports.resolveFnHO = function resolveFnHO(value) {
-    return () => exports.resolveFn(value);
-}
+//exports.resolveFnHO = function resolveFnHO(value) {
+    //return () => exports.resolveFn(value);
+//}
 
 /**
  * Returns a rejected Promise
  * @param  {String} reason Rejection reason
  * @return {Promise.Mixed} Promise rejected with given reason
  */
-exports.rejectFn = function rejectFn(reason) {
-    return Promise.reject(reason);
-}
+//exports.rejectFn = function rejectFn(reason) {
+    //return Promise.reject(reason);
+//}
 
 /**
  * Returns a function that return a rejected Promise with given reason
  * @param  {String} reason Rejection reason
  * @return {Function} Function that return a rejected Promise with given reason
  */
-exports.rejectFnHO = function rejectFnHO(reason) {
-    return () => exports.rejectFn(reason);
-}
+//exports.rejectFnHO = function rejectFnHO(reason) {
+    //return () => exports.rejectFn(reason);
+//}
 
 /**
  * Returns a function that throw a "Please stub this function" error
  * @param  {String} fnName Function name
- * @return {Promise.Mixed} "Please stub this function" error
+ * @return {Function} Function that throws a "Please stub this function" error
  */
 exports.stubMe = function stubMe(fnName) {
     return function stubThis() {
@@ -130,16 +130,29 @@ exports.stubMe = function stubMe(fnName) {
 
 // Module names, based on project root, to ensure consistency across tests
 // @TODO Dynamically build these
+exports.path = "path";
+exports.lodash = "lodash";
+exports.tape = "tape";
+exports.proxyquire = "proxyquire";
 exports.express = "express";
+
 exports.config = path.resolve("src/config");
 exports.utils = path.resolve("src/lib/utils");
 exports.middlewares = path.resolve("src/lib/middlewares");
 
 // Default stubs that will be used across tests
-// Any new dependency, and the functions used, must be added here to be stubbed
+// Any new dependency must be added here to be stubbed
 // @TODO Dynamically build these
 const defaultStubs = {
+
+    // External dependencies
+    [exports.path]: exports.stubMe("path"),
+    [exports.lodash]: exports.stubMe("lodash"),
+    [exports.tape]: exports.stubMe("tape"),
+    [exports.proxyquire]: exports.stubMe("proxyquire"),
     [exports.express]: exports.stubMe("express"),
+
+    // Internal dependencies
     [exports.config]: {
         getService: exports.stubMe("getService")
     },
