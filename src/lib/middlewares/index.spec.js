@@ -1,11 +1,10 @@
 "use strict";
 
-const path = require("path");
 const lodash = require("lodash");
 const test = require("blue-tape");
 const proxyquire = require("proxyquire");
 
-const moduleName = path.resolve("src/lib/middlewares/index");
+const moduleName = "./index";
 
 function nullFn() {
     return null;

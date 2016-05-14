@@ -1,11 +1,10 @@
 "use strict";
 
-const path = require("path");
 const lodash = require("lodash");
 const test = require("blue-tape");
 const proxyquire = require("proxyquire");
 
-const moduleName = path.resolve("src/lib/utils");
+const moduleName = "./index";
 
 function nullFn() {
     return null;
@@ -29,13 +28,13 @@ function stubMe(fnName) {
     };
 }
 
-const config = "./config";
+const utils = "./lib/utils";
 const start = "./lib/middlewares";
 
 const defaultStubs = {
     express: stubMe("express"),
-    [config]: {
-        getService: stubMe("getService")
+    [utils]: {
+        getLogger: stubMe("getLogger")
     },
     [start]: stubMe("start")
 };
@@ -44,12 +43,12 @@ function prepareStubs(customStubs) {
     return proxyquire(moduleName, lodash.merge({}, defaultStubs, customStubs));
 }
 
-test("Utils module", function(t) {
-    test("getLogger()", function(t) {
+test("Configuration module", function(t) {
+    test("getService()", function(t) {
         test("should throw an error", (t) => {
-            t.throws(
+            t.throws(() =>
                 prepareStubs({})
-                .getLogger
+                .getService()
             );
             t.end();
         });

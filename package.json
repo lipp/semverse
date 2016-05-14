@@ -10,7 +10,8 @@
   },
   "scripts": {
     "lint": "jslint src/*.js src/**/*.js tests/**/*.js",
-    "unit-tests": "tape tests/**/*.js | faucet",
+    "unit-tests-old": "tape src/**/*.spec.js | tap-spec",
+    "unit-tests": "tape src/index.spec.js | tap-spec",
     "test": "nyc --reporter=html $npm_package_config_nyc npm run unit-tests",
     "test-ci": "nyc --reporter=text-lcov $npm_package_config_nyc npm run unit-tests | coveralls",
     "start": "nodemon src/index.js"
@@ -34,13 +35,13 @@
   },
   "homepage": "https://github.com/StephaneTrebel/semverse#readme",
   "devDependencies": {
-    "blue-tape": "^0.2.0",
     "coveralls": "^2.11.9",
     "faucet": "0.0.1",
     "js-beautify": "^1.6.2",
     "nyc": "^6.4.0",
     "proxyquire": "^1.7.9",
     "sinon": "^1.17.3",
+    "tap-spec": "^4.1.1",
     "tape": "^4.5.1"
   },
   "dependencies": {

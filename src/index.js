@@ -1,10 +1,11 @@
 "use strict";
 
+const path = require("path");
 const express = require("express");
 
-const config = require("./config");
-const utils = require("./lib/utils");
-const start = require("./lib/middlewares");
+const config = require(path.resolve(__dirname, "./config"));
+const utils = require(path.resolve(__dirname, "./lib/utils"));
+const middlewares = require(path.resolve(__dirname, "./lib/middlewares"));
 
 /**
  * Service main function
@@ -21,11 +22,11 @@ function main() {
         logInfo("Starting service...", {});
         const app = express();
         const serviceConfig = config.getService();
-        return start(app, serviceConfig, utils)
+        return middlewares.start(app, serviceConfig, utils)
             .then(() => logInfo("Service started", {}))
             .catch(logCritical);
     } catch (error) {
-        return Promise.reject("Fatal error:" + error);
+        return Promise.reject(`Fatal error: ${error}`);
     }
 }
 
