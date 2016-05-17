@@ -1,11 +1,15 @@
 'use strict';
 
-function tbd(fnName) {
+/* Throw an error to alert that a function is not yet implemented
+ * @param   {String}    fnName          Function name
+ */
+exports.tbd = function tbd(fnName) {
     return () => {
         throw new Error("Not implemented:" + fnName);
     };
 }
-exports.getLogger = tbd("getLogger");
+
+exports.getLogger = exports.tbd("getLogger");
 
 //const path = require('path');
 ////const lodash = require('lodash/fp');
@@ -40,8 +44,3 @@ exports.getLogger = tbd("getLogger");
 //return require(path.resolve(__dirname, middleware));
 //}
 
-//module.exports = {
-//requireFromProjectRoot,
-//requireTestedModule,
-//requireMiddleware
-//};
