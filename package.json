@@ -7,13 +7,10 @@
     "scripts": {
         "lint": "jslint 'src/**/*.js' 'tests/**/*.js'",
         "generate-tap": "tape 'src/**/*.spec.js' > tap.log",
-        "pretty-tap": "cat tap.log | tap-spec",
-        "raw-tap": "cat tap.log | faucet",
-        "unit-tests": "npm run generate-tap",
-        "local-dev-raw": "npm run generate-tap && npm run raw-tap",
-        "local-dev-pretty": "npm run generate-tap && npm run pretty-tap",
-        "test": "NODE_ENV=test nyc --reporter=html --all npm run unit-tests",
-        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run unit-tests | coveralls",
+        "raw-tap": "npm run generate-tap && cat tap.log | faucet",
+        "pretty-tap": "npm run generate-tap && cat tap.log | tap-spec",
+        "test": "NODE_ENV=test nyc --reporter=html --all npm run generate-tap",
+        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run generate-tap | coveralls",
         "start": "nodemon src/index.js"
     },
     "repository": {
