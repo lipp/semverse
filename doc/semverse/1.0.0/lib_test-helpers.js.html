@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/test-helpers.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lib/test-helpers.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+const path = require("path");
+
+const lodash = require("lodash");
+const test = require("tape");
+const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
+
+// Export blue-tape Test function
+/**
+ * Returns a curried function that will execute a test with a merged
+ * description
+ * @param {String} blockDescription Test block description
+ * @param {String} testDescription Test description
+ * @param {Function} cb Callback call with blue-tape 't' object
+ * @return {CurriedFunction} Unit test function
+ */
+exports.unitTest = lodash.curry(
+    function unitTest(blockDescription, testDescription, cb) {
+        return test(`${blockDescription} : ${testDescription}`, cb);
+    });
+
+/**
+ * Returns a curried function that will execute several tests with a merged
+ * description
+ * @param {String} moduleDescription Module description
+ * @param {String} blockDescription Test block description
+ * @return {CurriedFunction} Test block function
+ */
+exports.testBlock = lodash.curry(
+    function testBlock(moduleDescription, blockDescription, cb) {
+        return cb(
+            exports.unitTest(`${moduleDescription} - ${blockDescription}`)
+        );
+    });
+
+/**
+ * Returns a curried function that will host several tests block with a merged
+ * description
+ * @param {String} moduleDescription Module description
+ * @param {String} blockDescription Test block description
+ * @return {CurriedFunction} Test block function
+ */
+exports.testModuleBlock = function testModuleBlock(moduleDescription, cb) {
+    return cb(
+        exports.testBlock(moduleDescription)
+    );
+}
+
+/**
+ * Returns null
+ * @return {Null}                   Null
+ */
+exports.nullFn = function nullFn() {
+    return null;
+}
+
+/**
+ * Returns a function that returns null
+ * @return {Function} Function that returns null
+ */
+exports.nullFnHO = function nullFnHO() {
+    return () => exports.nullFn();
+}
+
+/**
+ * Throws an Error
+ * @param {String} error Error message
+ * @return {Error} Error thrown
+ */
+exports.throwFn = function throwFn(error) {
+    throw new Error(error);
+}
+
+/**
+ * Returns a function that throws an Error
+ * @param  {String} error Error message
+ * @return {Function} Function that throws an error
+ */
+exports.throwFnHO = function throwFnHO(error) {
+    return () => exports.throwFn(error);
+}
+
+/**
+ * Returns a resolved Promise
+ * @param  {String} value Resolved value
+ * @return {Promise.Mixed} Promise resoved with given value
+ */
+exports.resolveFn = function resolveFn(value) {
+    return Promise.resolve(value);
+}
+
+/**
+ * Returns a function that return a resolved Promise with given value
+ * @param  {String} value Resolved value
+ * @return {Function} Function that return a resolved Promise with given value
+ */
+//exports.resolveFnHO = function resolveFnHO(value) {
+    //return () => exports.resolveFn(value);
+//}
+
+/**
+ * Returns a rejected Promise
+ * @param  {String} reason Rejection reason
+ * @return {Promise.Mixed} Promise rejected with given reason
+ */
+//exports.rejectFn = function rejectFn(reason) {
+    //return Promise.reject(reason);
+//}
+
+/**
+ * Returns a function that return a rejected Promise with given reason
+ * @param  {String} reason Rejection reason
+ * @return {Function} Function that return a rejected Promise with given reason
+ */
+//exports.rejectFnHO = function rejectFnHO(reason) {
+    //return () => exports.rejectFn(reason);
+//}
+
+// Module names, based on project root, to ensure consistency across tests
+// @TODO Dynamically build these
+exports.path = "path";
+exports.lodash = "lodash";
+exports.tape = "tape";
+exports.proxyquire = "proxyquire";
+exports.express = "express";
+
+exports.config = path.resolve("src/config");
+exports.utils = path.resolve("src/lib/utils");
+exports.middlewares = path.resolve("src/lib/middlewares");
+
+// Default stubs that will be used across tests
+// Any new dependency must be added here to be stubbed
+// @TODO Dynamically build these
+const defaultStubs = {
+
+    // External dependencies
+    [exports.path]: path,
+    [exports.lodash]: lodash,
+    [exports.tape]: { '@noCallThru': true },
+    [exports.proxyquire]: proxyquire,
+    [exports.express]: { '@noCallThru': true },
+
+    // Internal dependencies
+    [exports.config]: { '@noCallThru': true },
+    [exports.utils]: { '@noCallThru': true },
+    [exports.middlewares]: { '@noCallThru': true }
+};
+
+/**
+ * Require a proxified module with defaultStubs eventually overloaded with
+ * custom stubs
+ * @param  {String} moduleName Proxified module name
+ * @param  {Object} customStubs Custom stubs for the proxified module
+ * @return {Object} Required proxified module
+ */
+exports.prepareStubs = lodash.curry(
+    function prepareStubs(moduleName, customStubs) {
+        return proxyquire(moduleName, lodash.merge({}, defaultStubs, customStubs));
+    });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#main">main</a></li><li><a href="global.html#nullFn">nullFn</a></li><li><a href="global.html#nullFnHO">nullFnHO</a></li><li><a href="global.html#path">path</a></li><li><a href="global.html#prepareStubs">prepareStubs</a></li><li><a href="global.html#resolveFn">resolveFn</a></li><li><a href="global.html#testBlock">testBlock</a></li><li><a href="global.html#testModuleBlock">testModuleBlock</a></li><li><a href="global.html#throwFn">throwFn</a></li><li><a href="global.html#throwFnHO">throwFnHO</a></li><li><a href="global.html#unitTest">unitTest</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sun May 22 2016 18:13:12 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
