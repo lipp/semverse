@@ -28,12 +28,4 @@ testModuleBlock("Test helpers library", (testBlock) => {
             t.end();
         });
     });
-    testBlock("stubMe()", (unitTest) => {
-        unitTest("when given a unit test", (t) => {
-            t.throws(
-                m({}).stubMe('a'),
-                "should return a function that throws an error");
-            t.end();
-        });
-    });
 });

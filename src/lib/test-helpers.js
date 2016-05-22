@@ -4,7 +4,7 @@ const path = require("path");
 
 const lodash = require("lodash");
 const test = require("tape");
-const proxyquire = require("proxyquire");
+const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
 
 // Export blue-tape Test function
 /**
@@ -117,17 +117,6 @@ exports.resolveFn = function resolveFn(value) {
     //return () => exports.rejectFn(reason);
 //}
 
-/**
- * Returns a function that throw a "Please stub this function" error
- * @param  {String} fnName Function name
- * @return {Function} Function that throws a "Please stub this function" error
- */
-exports.stubMe = function stubMe(fnName) {
-    return function stubThis() {
-        throw new Error("Please stub this function: " + fnName);
-    };
-}
-
 // Module names, based on project root, to ensure consistency across tests
 // @TODO Dynamically build these
 exports.path = "path";
@@ -146,22 +135,16 @@ exports.middlewares = path.resolve("src/lib/middlewares");
 const defaultStubs = {
 
     // External dependencies
-    [exports.path]: exports.stubMe("path"),
-    [exports.lodash]: exports.stubMe("lodash"),
-    [exports.tape]: exports.stubMe("tape"),
-    [exports.proxyquire]: exports.stubMe("proxyquire"),
-    [exports.express]: exports.stubMe("express"),
+    [exports.path]: path,
+    [exports.lodash]: lodash,
+    [exports.tape]: { '@noCallThru': true },
+    [exports.proxyquire]: proxyquire,
+    [exports.express]: { '@noCallThru': true },
 
     // Internal dependencies
-    [exports.config]: {
-        getService: exports.stubMe("getService")
-    },
-    [exports.utils]: {
-        getLogger: exports.stubMe("getLogger")
-    },
-    [exports.middlewares]: {
-        start: exports.stubMe("start")
-    }
+    [exports.config]: { '@noCallThru': true },
+    [exports.utils]: { '@noCallThru': true },
+    [exports.middlewares]: { '@noCallThru': true }
 };
 
 /**

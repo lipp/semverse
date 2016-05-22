@@ -26,9 +26,12 @@ const m = prepareStubs(path.resolve(__dirname, "./index"));
 testModuleBlock("Config loader", (testBlock) => {
     testBlock("getService()", (unitTest) => {
         unitTest("since it's not implemented yet", (t) => {
-            t.throws(
-                m({}).getService,
-                "should throw an error");
+            t.notEqual(
+                typeof m({
+                    [utils]: { tbd: () => null }
+                }).getService,
+                undefined,
+                "should be defined");
             t.end();
         });
     });

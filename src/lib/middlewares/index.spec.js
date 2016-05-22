@@ -26,9 +26,12 @@ const m = prepareStubs(path.resolve(__dirname, "./index"));
 testModuleBlock("Middleware loader", (testBlock) => {
     testBlock("start()", (unitTest) => {
         unitTest("since it's not implemented yet", (t) => {
-            t.throws(
-                m({}).start,
-                "should throw an error");
+            t.notEqual(
+                typeof m({
+                    [utils]: { tbd: () => null }
+                }).start,
+                undefined,
+                "should be defined");
             t.end();
         });
     });
