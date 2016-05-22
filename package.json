@@ -9,8 +9,8 @@
         "generate-tap": "tape 'src/**/*.spec.js' > tap.log",
         "raw-tap": "npm run generate-tap && cat tap.log | faucet",
         "pretty-tap": "npm run generate-tap && cat tap.log | tap-spec",
-        "test": "NODE_ENV=test nyc --reporter=html --all npm run generate-tap",
-        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run generate-tap | coveralls",
+        "test": "NOVE_ENV=test nyc --reporter=html --all --check-coverage --lines 100 npm run raw-tap",
+        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run pretty-tap | coveralls",
         "start": "nodemon src/index.js"
     },
     "repository": {
