@@ -9,6 +9,7 @@ A universe that follows SemVer constraints
 # So what is this about ?
 It's a nodejs service that exposes a REST API allowing you do to...well whatever you want :D
 Start with a universe, populate it and interact with your sandbox !
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+[![Deploy in your Heroku now !](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 See also the [GitHub Page](http://stephanetrebel.github.io/semverse)
