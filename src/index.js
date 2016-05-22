@@ -8,7 +8,7 @@ const utils = require(path.resolve(__dirname, "./lib/utils"));
 const middlewares = require(path.resolve(__dirname, "./lib/middlewares"));
 
 /**
- * Service main function
+ * Service starter function
  *
  * @return {Promise}        Fulfilled when service is started
  **/
@@ -26,11 +26,13 @@ exports.main = function main() {
             .then(() => logInfo("Service started", {}))
             .catch(logCritical);
     } catch (error) {
-        return Promise.reject(`Fatal error: ${error}`);
+        return Promise.reject(error);
     }
 };
 
 /* istanbul ignore if */
 if (process.env.NODE_ENV !== "test") {
-    exports.main();
+    exports.main()
+        .then(() => console.log(`Service terminated`))
+        .catch((error) => console.log(`Fatal error: ${error}`));
 }

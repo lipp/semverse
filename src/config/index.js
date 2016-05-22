@@ -1,12 +1,10 @@
 "use strict";
 
-function tbd(fnName) {
-    return () => {
-        throw new Error("Not implemented:" + fnName);
-    };
-}
+const path = require("path");
+
+const { tbd } = require(path.resolve(__dirname, "../lib/utils"));
+
 exports.getService = tbd("getService");
-//"use strict";
 
 //const _ = require("lodash");
 //const configDefault = require("./default");

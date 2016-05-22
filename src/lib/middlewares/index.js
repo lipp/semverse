@@ -1,12 +1,10 @@
 'use strict';
 
-function tbd(fnName) {
-    return () => {
-        throw new Error("Not implemented:" + fnName);
-    };
-}
+const path = require("path");
+
+const { tbd } = require(path.resolve(__dirname, "../utils"));
+
 exports.start = tbd("start");
-//"use strict";
 
 //const utilsLib = require('../utils');
 
