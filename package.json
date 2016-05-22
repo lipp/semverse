@@ -5,12 +5,11 @@
     "main": "index.js",
     "config": {},
     "scripts": {
-        "lint": "jslint 'src/**/*.js' 'tests/**/*.js'",
-        "generate-tap": "tape 'src/**/*.spec.js' > tap.log",
-        "raw-tap": "npm run generate-tap && cat tap.log | faucet",
-        "pretty-tap": "npm run generate-tap && cat tap.log | tap-spec",
-        "test": "NOVE_ENV=test nyc --reporter=html --all --check-coverage --lines 100 npm run raw-tap",
-        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run pretty-tap | coveralls",
+        "lint": "jslint 'src/**/*.js'",
+        "tape-faucet": "tape 'src/**/*.spec.js' | faucet",
+        "tape-spec": "tape 'src/**/*.spec.js' | tap-spec",
+        "test": "NOVE_ENV=test nyc --reporter=html --all --check-coverage --lines 100 npm run tape-faucet",
+        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run tape-spec | coveralls",
         "start": "nodemon src/index.js"
     },
     "repository": {
@@ -35,6 +34,7 @@
         "coveralls": "^2.11.9",
         "faucet": "0.0.1",
         "js-beautify": "^1.6.2",
+        "jsdoc": "^3.4.0",
         "nyc": "^6.4.0",
         "proxyquire": "^1.7.9",
         "sinon": "^1.17.3",
