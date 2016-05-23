@@ -5,7 +5,7 @@
     "main": "index.js",
     "config": {},
     "scripts": {
-        "doc": "jsdoc -r -d doc -R ./README.md -P ./package.json --debug src",
+        "docs": "jsdoc -r -d docs -R ./README.md -P ./package.json --debug src",
         "lint": "jslint 'src/**/*.js'",
         "tape-faucet": "tape 'src/**/*.spec.js' | faucet",
         "tape-spec": "tape 'src/**/*.spec.js' | tap-spec",
@@ -53,6 +53,7 @@
     "nyc": {
         "exclude": [
             "coverage",
+            "docs",
             "src/index.spec.js",
             "'**/*.spec.js'",
             "tests"
