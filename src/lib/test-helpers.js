@@ -3,49 +3,50 @@
 const path = require("path");
 
 const lodash = require("lodash");
-const test = require("tape");
+const tape = require("tape");
 const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
 
-// Export blue-tape Test function
 /**
- * Returns a curried function that will execute a test with a merged
- * description
- * @param {String} blockDescription Test block description
- * @param {String} testDescription Test description
- * @param {Function} cb Callback call with blue-tape 't' object
- * @return {CurriedFunction} Unit test function
+ * Returns a curried function that will execute a test with a description
+ * pre fed by the parent test block
+ * @curried
+ * @private
+ * @param {Function} testFn - Test engine
+ * @param {String} blockDescription - Parent block description
+ * @param {String} testDescription - This Test description
+ * @param {Function} cb - Callback called with test engine object
+ * @return {Function} Atomic test handler
  */
-exports.unitTest = lodash.curry(
-    function unitTest(blockDescription, testDescription, cb) {
-        return test(`${blockDescription} : ${testDescription}`, cb);
+exports._unitTest = lodash.curry(
+    function _unitTest(testFn, blockDescription, testDescription, cb) {
+        return testFn(`${blockDescription} : ${testDescription}`, cb);
     });
 
 /**
- * Returns a curried function that will execute several tests with a merged
+ * Returns a function that will execute several tests with a concatenated
  * description
- * @param {String} moduleDescription Module description
- * @param {String} blockDescription Test block description
- * @return {CurriedFunction} Test block function
+ * @public
+ * @param {String} parentBlockDescription - Parent block description
+ * @param {String} [blockDescription] - This test block description
+ * @param {Function} cb - Callback
+ * @return {Function} Test block handler
  */
-exports.testBlock = lodash.curry(
-    function testBlock(moduleDescription, blockDescription, cb) {
-        return cb(
-            exports.unitTest(`${moduleDescription} - ${blockDescription}`)
-        );
-    });
-
-/**
- * Returns a curried function that will host several tests block with a merged
- * description
- * @param {String} moduleDescription Module description
- * @param {String} blockDescription Test block description
- * @return {CurriedFunction} Test block function
- */
-exports.testModuleBlock = function testModuleBlock(moduleDescription, cb) {
-    return cb(
-        exports.testBlock(moduleDescription)
-    );
-}
+exports.testBlock = function testBlock(parentBlockDescription, blockDescription, cb) {
+    let cb2;
+    let msg;
+    if (lodash.isFunction(blockDescription)) {
+        cb2 = blockDescription;
+        msg = parentBlockDescription;
+    } else {
+        cb2 = cb;
+        msg = `${parentBlockDescription} - ${blockDescription}`;
+    }
+    const newTestBlock = (b, c) => exports.testBlock(msg, b, c);
+    newTestBlock.test = exports._unitTest(tape, msg);
+    newTestBlock.skip = exports._unitTest(tape.skip, msg);
+    newTestBlock.only = exports._unitTest(tape.only, msg);
+    return cb2(newTestBlock);
+};
 
 /**
  * Returns null
@@ -53,7 +54,7 @@ exports.testModuleBlock = function testModuleBlock(moduleDescription, cb) {
  */
 exports.nullFn = function nullFn() {
     return null;
-}
+};
 
 /**
  * Returns a function that returns null
@@ -61,7 +62,7 @@ exports.nullFn = function nullFn() {
  */
 exports.nullFnHO = function nullFnHO() {
     return () => exports.nullFn();
-}
+};
 
 /**
  * Throws an Error
@@ -70,7 +71,7 @@ exports.nullFnHO = function nullFnHO() {
  */
 exports.throwFn = function throwFn(error) {
     throw new Error(error);
-}
+};
 
 /**
  * Returns a function that throws an Error
@@ -79,7 +80,7 @@ exports.throwFn = function throwFn(error) {
  */
 exports.throwFnHO = function throwFnHO(error) {
     return () => exports.throwFn(error);
-}
+};
 
 /**
  * Returns a resolved Promise
@@ -88,7 +89,7 @@ exports.throwFnHO = function throwFnHO(error) {
  */
 exports.resolveFn = function resolveFn(value) {
     return Promise.resolve(value);
-}
+};
 
 /**
  * Returns a function that return a resolved Promise with given value
@@ -96,7 +97,7 @@ exports.resolveFn = function resolveFn(value) {
  * @return {Function} Function that return a resolved Promise with given value
  */
 //exports.resolveFnHO = function resolveFnHO(value) {
-    //return () => exports.resolveFn(value);
+//return () => exports.resolveFn(value);
 //}
 
 /**
@@ -105,7 +106,7 @@ exports.resolveFn = function resolveFn(value) {
  * @return {Promise.Mixed} Promise rejected with given reason
  */
 //exports.rejectFn = function rejectFn(reason) {
-    //return Promise.reject(reason);
+//return Promise.reject(reason);
 //}
 
 /**
@@ -114,11 +115,10 @@ exports.resolveFn = function resolveFn(value) {
  * @return {Function} Function that return a rejected Promise with given reason
  */
 //exports.rejectFnHO = function rejectFnHO(reason) {
-    //return () => exports.rejectFn(reason);
+//return () => exports.rejectFn(reason);
 //}
 
 // Module names, based on project root, to ensure consistency across tests
-// @TODO Dynamically build these
 exports.path = "path";
 exports.lodash = "lodash";
 exports.tape = "tape";
@@ -131,20 +131,29 @@ exports.middlewares = path.resolve("src/lib/middlewares");
 
 // Default stubs that will be used across tests
 // Any new dependency must be added here to be stubbed
-// @TODO Dynamically build these
 const defaultStubs = {
 
     // External dependencies
     [exports.path]: path,
     [exports.lodash]: lodash,
-    [exports.tape]: { '@noCallThru': true },
+    [exports.tape]: {
+        '@noCallThru': true
+    },
     [exports.proxyquire]: proxyquire,
-    [exports.express]: { '@noCallThru': true },
+    [exports.express]: {
+        '@noCallThru': true
+    },
 
     // Internal dependencies
-    [exports.config]: { '@noCallThru': true },
-    [exports.utils]: { '@noCallThru': true },
-    [exports.middlewares]: { '@noCallThru': true }
+    [exports.config]: {
+        '@noCallThru': true
+    },
+    [exports.utils]: {
+        '@noCallThru': true
+    },
+    [exports.middlewares]: {
+        '@noCallThru': true
+    }
 };
 
 /**
