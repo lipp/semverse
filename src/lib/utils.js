@@ -46,3 +46,7 @@ exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
 //function requireMiddleware(middleware) {
 //return require(path.resolve(__dirname, middleware));
 //}
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
