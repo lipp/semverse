@@ -4,55 +4,72 @@ const path = require("path");
 
 const {
     // Primary test functions
-    testModuleBlock,
+    t,
     prepareStubs,
+    stub,
 
     // Helpers
     nullFn,
     nullFnHO,
-    throwFn,
     throwFnHO,
-    resolveFn,
-
-    // Dependencies to stub
-    express,
-    config,
-    utils,
-    middlewares
+    rejectFn
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareStubs(path.resolve(__dirname, "./index"));
 
-testModuleBlock("Service starter", (testBlock) => {
-    testBlock("main()", (unitTest) => {
-        unitTest("when an error happens", (t) => {
+t("Service starter", function(t) {
+    t("instanciateService()", function(t) {
+        t.test("when an error happens", (t) =>
             m({
-                    [utils]: {
-                        getLogger: throwFnHO
-                    }
-                })
+                utils: {
+                    getLogger: throwFnHO
+                }
+            })
+            .instanciateService()
+            .catch(() => t.pass("should return a rejected Promise"))
+        );
+        t.test("when no errors happen", (t) =>
+            m({
+                utils: {
+                    getLogger: nullFnHO
+                },
+                middlewareLoader: {
+                    factory: () => true
+                }
+            })
+            .instanciateService()
+            .then(() => t.pass("should return a resolved Promise"))
+        );
+    });
+    t("main()", function(t) {
+        t.test("when an error happens", function(t) {
+            const testModule = m({
+                utils: {
+                    getLogger: nullFnHO
+                }
+            });
+            stub(testModule, "instanciateService", rejectFn);
+            return testModule
                 .main()
-                .then(() => t.fail("should have returned a rejected Promise"))
-                .catch(() => t.pass("should return a rejected Promise"))
-                .then(t.end);
+                .catch(() => t.pass("should return a rejected Promise"));
         });
-        unitTest("when no errors happen", (t) => {
-            m({
-                    [express]: nullFn,
-                    [config]: {
-                        getService: nullFn
-                    },
-                    [utils]: {
-                        getLogger: nullFnHO
-                    },
-                    [middlewares]: {
-                        start: resolveFn
-                    }
-                })
+        t.test("when no errors happen", function(t) {
+            const testModule = m({
+                express: nullFn,
+                config: {
+                    getService: nullFn
+                },
+                utils: {
+                    getLogger: nullFnHO
+                }
+            });
+            stub(testModule, "instanciateService", () => ({
+                startInstance: nullFn
+            }));
+            return testModule
                 .main()
                 .then(() => t.pass("should return a resolved Promise"))
-                .catch(() => t.fail("should have returned a resolved Promise"))
-                .then(t.end);
+                .finally(() => testModule.instanciateService.restore());
         });
     });
 });

@@ -1,27 +1,30 @@
-'use strict';
+"use strict";
 
-/* Throw an error to alert that a function is not yet implemented
- * @param   {String}    fnName          Function name
- */
-exports.tbd = function tbd(fnName) {
-    return () => {
-        throw new Error("Not implemented:" + fnName);
-    };
-}
+const path = require("path");
 
-exports.getLogger = exports.tbd("getLogger");
+const {
+    curry,
+    flow,
+    get,
+    map,
+    tap
+} = require("lodash/fp");
+exports.curry = curry;
+exports.flow = flow;
+exports.get = get;
+exports.map = map;
+exports.tap = tap;
 
-//const path = require('path');
-////const lodash = require('lodash/fp');
+exports.getLogger = () => console.log;
 
 /* Require a module from the project Root directory
  * @param   {String}    moduleName      Module name
  * @return  {Mixed}                     Module exports
  */
-//function requireFromProjectRoot(moduleName) {
-//const projectRoot = path.resolve(__dirname, '../');
-//return require(path.join(projectRoot, moduleName));
-//}
+exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
+    const projectRoot = path.resolve(__dirname, '../');
+    return require(path.join(projectRoot, moduleName));
+};
 
 /* Require a module based on its test name
  * @param   {String}    testFileName    Tested module name
@@ -43,4 +46,3 @@ exports.getLogger = exports.tbd("getLogger");
 //function requireMiddleware(middleware) {
 //return require(path.resolve(__dirname, middleware));
 //}
-

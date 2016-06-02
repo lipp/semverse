@@ -1,17 +1,17 @@
 {
     "name": "semverse",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "A small universe, SemVer based",
     "main": "index.js",
     "config": {},
     "scripts": {
-        "docs": "jsdoc -r -d docs -R ./README.md -P ./package.json --debug src",
+        "docs": "jsdoc -r -d docs -R ./README.md -P ./package.json --debug src/index.js",
         "lint": "jslint 'src/**/*.js'",
-        "tape-faucet": "tape 'src/**/*.spec.js' | faucet",
-        "tape-spec": "tape 'src/**/*.spec.js' | tap-spec",
-        "test": "NOVE_ENV=test nyc --reporter=html --all --check-coverage --lines 100 npm run tape-faucet",
-        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run tape-spec | coveralls",
-        "start": "nodemon src/index.js"
+        "tape-faucet": "NODE_ENV=test tape 'src/**/*.spec.js' | faucet",
+        "tape-spec": "NODE_ENV=test tape 'src/**/*.spec.js' | tap-spec",
+        "test": "npm run lint && nyc --reporter=text --all npm run tape-faucet && nyc report --reporter=html && nyc check-coverage --lines 100 --functions 100 --branches 100",
+        "test-ci": "npm run lint && nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run tape-spec | coveralls",
+        "start": "NODE_ENV=production nodemon src/index.js"
     },
     "repository": {
         "type": "git",
@@ -54,7 +54,6 @@
         "exclude": [
             "coverage",
             "docs",
-            "src/index.spec.js",
             "'**/*.spec.js'",
             "tests"
         ]

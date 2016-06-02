@@ -1,10 +1,6 @@
 "use strict";
-
-const path = require("path");
-
-const { tbd } = require(path.resolve(__dirname, "../lib/utils"));
-
-exports.getService = tbd("getService");
+module.exports = {};
+//exports.getService = tbd("getService");
 
 //const _ = require("lodash");
 //const configDefault = require("./default");
