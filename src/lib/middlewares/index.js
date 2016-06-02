@@ -1,107 +1,122 @@
 'use strict';
 
-const path = require("path");
+const lodash = require("lodash/fp");
+const BPromise = require("bluebird");
 
-const { tbd } = require(path.resolve(__dirname, "../utils"));
+exports.factory = function factory(context) {
 
-exports.start = tbd("start");
+    const utils = lodash.get('utils', context);
+    const config = lodash.get('config', context);
 
-//const utilsLib = require('../utils');
+    const curry = lodash.curry;
+    const flow = lodash.flow;
+    const get = lodash.get;
+    const map = lodash.map;
+    const tap = lodash.tap;
 
-/*
- * Use a middlewaree
- * @param  {Object}             app         App reference
- * @param  {Function}           middleware  Middleware function
- * @return {Boolean}            True on success
- */
-//exports.useMiddleware = curry((app, middleware) => app.use(middleware));
+    const requireFromProjectRoot = lodash.get('requireFromProjectRoot', utils);
+    const getLogger = lodash.get('getLogger', utils);
 
-/*
- * Initialize a middleware
- * @param  {Object}             utils           Utils collection
- * @param  {Object}             config          Config reference
- * @param  {Function}           log             Log Function
- * @param  {Function}           middleware      Middleware function
- * @return {Promise.Boolean}    True on success
- */
-//exports.initMiddleware = function initMiddleware(utilsRef, config, log, middleware) {
-//return middleware(utilsRef, config, log);
-//};
+    //const {
+    //utils,
+    //config
+    //} = context;
+    //const {
+    //curry, flow, get, map, tap,
+    //requireFromProjectRoot,
+    //getLogger
+    //} = utils;
 
-//exports.stateful = function factory(utilsRef, configRef, logRef) {
+    const log = getLogger(context);
 
-//const {curry, flow, get, map, tap} = utilsRef;
-//const config = configRef;
-//const log = logRef;
+    const instance = {};
 
-//return {
+    /*
+     * @name registerMiddleware
+     * @description Register a middleware
+     * @curried
+     * @param  {Object} app - App reference
+     * @param  {Function} middleware - Middleware function
+     * @return {Boolean} True on success
+     */
+    instance.registerMiddleware = curry((app, middleware) => app.use(middleware));
 
-/*
- * Config port getter. Default is 9100
- * @return {Number}             Config port
- */
-//getPort() {
-//return get("port", config, 9100);
-//},
+    /*
+     * Initialize a middleware with the current context
+     * @param  {Function} middleware - Middlewre function
+     * @return {Promise} Fulfilled on success
+     */
+    instance.initMiddleware = function initMiddleware(middleware) {
+        return middleware(context);
+    };
 
-/*
- * Middleware initializer
- * Pull all middleware names from config and apply them to the app
- * @param  {Object}             app         Service reference
- * @return {Promise.Boolean}    True when all middlewares are initialized
- */
-//mwInit(app) {
-//log("info", "Initializing middlewares...");
-//return flow(
-//// Retrieve the middleware list from the config
-//get("middlewareList"),
-//// Log it
-//tap((list) => log("info", "Middleware list: ", list)),
-//// Require everything
-//map(utilsLib.requireModule),
-//// Call all middlewares factories to create middleware
-//// functions
-//map(exports.initMiddleware),
-//// Wait for all initializations to resolve
-//Promise.all,
-//(p) => p
-//.then(map(exports.useMiddleware(app)))
-//.then(() => log("info", "Successfully intitialized middlewares"))
-//.then(() => true)
-//.catch((err) => log("error",
-//"Error while initializing middlewares: ",
-//err.stack))
-//)(config);
-//},
+    /*
+     * Config port getter. Default is 9100
+     * @return {Number} Configured port
+     */
+    instance.getPort = function getPort() {
+        return get("port", config) || 9100;
+    };
 
-/*
- * Service starter
- * Init all middlewares and make the app listen on config hostname/port
- * @param  {Object}     utils       Utility functions library reference
- * @param  {Object}     app         Service reference
- * @param  {Object}     config      Config reference
- * @param  {Object}     log         Log function reference
- * @return {Promise}                Fulfilled with true if no errors
- */
-//start(app) {
-////app.use(function (req, res, next) {
-////log("info", "COUCOU !");
-////next();
-////});
-////app.use(function (err, req, res, next) {
-////log("error", "ERROR: ", err.stack);
-////next(err);
-////});
-//const port = exports.getPort();
-//log("info", "Starting service...");
-//return exports.mwInit(app)
-//.then(() => app.listen(
-//port,
-//() => log("info", `Service successfully started on port ${port}`)
-//))
-//.catch((err) => log("error",
-//"Fatal error while starting the service: ",
-//err.stack));
-//}
-//};
-//};
+    /*
+     * Middleware loader
+     * Pull all middleware names from config and register them in the app
+     * @param  {Object} app - Service reference
+     * @return {Promise} Fulfilled when all middlewares are initialized
+     */
+    instance.loadMiddlewares = function loadMiddlewares(app) {
+        log("debug", `Config is ${JSON.stringify(config)}`);
+        log("info", `Loading middlewares...`);
+        return BPromise
+            .try(() => flow(
+                // Retrieve the middleware list from the config
+                get("middlewareList"),
+                // Handle empty middlewareList cases
+                (a) => a || [],
+                // Log it
+                tap((a) => log("debug", `Middleware list: ${JSON.stringify(a)}`)),
+                // Require everything
+                map(requireFromProjectRoot),
+                // Call all middlewares factories to get middleware instances
+                map(instance.initMiddleware),
+                // Wait for all initializations to resolve
+                (middlewarePromises) => BPromise.all(middlewarePromises),
+                // Then register them in the service
+                (allresolved) => allresolved
+                .then(map(instance.registerMiddleware(app)))
+                .then(() => log("info", `Successfully intitialized middlewares`))
+                .catch(function(error) {
+                    log("error", `Error while loading middlewares: ${error}`);
+                    return BPromise.reject(error);
+                })
+            )(config));
+    };
+
+    /*
+     * Service starter
+     * Init all middlewares and make the app listen on config hostname/port
+     * @param  {Object} app - Service reference
+     * @return {Promise} Fulfilled when instance is successfully started
+     */
+    instance.startInstance = function startInstance(app) {
+        return BPromise
+            .try(function() {
+                const port = instance.getPort();
+                log("info", `Starting service instance on port ${port}...`);
+                return instance.loadMiddlewares(app)
+                    .then(() => app.listen(
+                        port, () => log("info",
+                            `Service instance successfully started`
+                        )
+                    ))
+                    .catch(function(error) {
+                        log("critical",
+                            `Fatal error while starting the service instance: ${error}`
+                        );
+                        return BPromise.reject(error);
+                    });
+            });
+    };
+
+    return instance;
+};
