@@ -1,17 +1,17 @@
 {
     "name": "semverse",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "A small universe, SemVer based",
     "main": "index.js",
     "config": {},
     "scripts": {
-        "lint": "jslint 'src/**/*.js' 'tests/**/*.js'",
-        "generate-tap": "tape 'src/**/*.spec.js' > tap.log",
-        "raw-tap": "npm run generate-tap && cat tap.log | faucet",
-        "pretty-tap": "npm run generate-tap && cat tap.log | tap-spec",
-        "test": "NOVE_ENV=test nyc --reporter=html --all --check-coverage --lines 100 npm run raw-tap",
-        "test-ci": "NOVE_ENV=test nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run pretty-tap | coveralls",
-        "start": "nodemon src/index.js"
+        "docs": "jsdoc -r -d docs -R ./README.md -P ./package.json --debug src/index.js",
+        "lint": "jslint 'src/**/*.js'",
+        "tape-faucet": "NODE_ENV=test tape 'src/**/*.spec.js' | faucet",
+        "tape-spec": "NODE_ENV=test tape 'src/**/*.spec.js' | tap-spec",
+        "test": "npm run lint && nyc --reporter=text --all npm run tape-faucet && nyc report --reporter=html && nyc check-coverage --lines 100 --functions 100 --branches 100",
+        "test-ci": "npm run lint && nyc --reporter=text-lcov --all --check-coverage --lines 100 npm run tape-spec | coveralls",
+        "start": "NODE_ENV=production nodemon src/index.js"
     },
     "repository": {
         "type": "git",
@@ -32,9 +32,12 @@
     },
     "homepage": "https://github.com/StephaneTrebel/semverse#readme",
     "devDependencies": {
+        "blue-tape": "^0.2.0",
         "coveralls": "^2.11.9",
         "faucet": "0.0.1",
         "js-beautify": "^1.6.2",
+        "jsdoc": "^3.4.0",
+        "jslint": "^0.10.1",
         "nyc": "^6.4.0",
         "proxyquire": "^1.7.9",
         "sinon": "^1.17.3",
@@ -44,6 +47,7 @@
     "dependencies": {
         "express": "^4.13.4",
         "lodash": "^4.7.0",
+        "nodemon": "^1.9.2",
         "sequelize": "^3.20.0",
         "swagger-router": "^0.4.1",
         "swagger-tools": "^0.10.1",
@@ -52,7 +56,7 @@
     "nyc": {
         "exclude": [
             "coverage",
-            "src/index.spec.js",
+            "docs",
             "'**/*.spec.js'",
             "tests"
         ]

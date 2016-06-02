@@ -4,5 +4,6 @@
     "indent": 4,
     "node": true,
     "nomen": true,
-    "white": true
+    "white": true,
+    "fudge": true
 }
