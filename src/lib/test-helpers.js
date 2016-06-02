@@ -2,8 +2,11 @@
 
 const path = require("path");
 
-const lodash = require("lodash");
-const tape = require("tape");
+const lodash = require("lodash/fp");
+const BPromise = require("bluebird");
+
+const tape = require("blue-tape");
+const sinon = require("sinon");
 const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
 
 /**
@@ -17,8 +20,8 @@ const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
  * @param {Function} cb - Callback called with test engine object
  * @return {Function} Atomic test handler
  */
-exports._unitTest = lodash.curry(
-    function _unitTest(testFn, blockDescription, testDescription, cb) {
+exports.unitTest = lodash.curry(
+    function unitTest(testFn, blockDescription, testDescription, cb) {
         return testFn(`${blockDescription} : ${testDescription}`, cb);
     });
 
@@ -31,7 +34,7 @@ exports._unitTest = lodash.curry(
  * @param {Function} cb - Callback
  * @return {Function} Test block handler
  */
-exports.testBlock = function testBlock(parentBlockDescription, blockDescription, cb) {
+exports.t = function t(parentBlockDescription, blockDescription, cb) {
     let cb2;
     let msg;
     if (lodash.isFunction(blockDescription)) {
@@ -41,16 +44,25 @@ exports.testBlock = function testBlock(parentBlockDescription, blockDescription,
         cb2 = cb;
         msg = `${parentBlockDescription} - ${blockDescription}`;
     }
-    const newTestBlock = (b, c) => exports.testBlock(msg, b, c);
-    newTestBlock.test = exports._unitTest(tape, msg);
-    newTestBlock.skip = exports._unitTest(tape.skip, msg);
-    newTestBlock.only = exports._unitTest(tape.only, msg);
+    const newTestBlock = (b, c) => exports.t(msg, b, c);
+    newTestBlock.test = exports.unitTest(tape, msg);
+    newTestBlock.skip = exports.unitTest(tape.skip, msg);
+    newTestBlock.only = exports.unitTest(tape.only, msg);
     return cb2(newTestBlock);
 };
 
 /**
+ * Identity function
+ * @param {Mixed} input - Value to be returned
+ * @return {Mixed} Same as input
+ */
+exports.idFn = function idFn(input) {
+    return input;
+};
+
+/**
  * Returns null
- * @return {Null}                   Null
+ * @return {Null} Null
  */
 exports.nullFn = function nullFn() {
     return null;
@@ -66,7 +78,7 @@ exports.nullFnHO = function nullFnHO() {
 
 /**
  * Throws an Error
- * @param {String} error Error message
+ * @param {String} error - Error message
  * @return {Error} Error thrown
  */
 exports.throwFn = function throwFn(error) {
@@ -75,7 +87,7 @@ exports.throwFn = function throwFn(error) {
 
 /**
  * Returns a function that throws an Error
- * @param  {String} error Error message
+ * @param {String} error - Error message
  * @return {Function} Function that throws an error
  */
 exports.throwFnHO = function throwFnHO(error) {
@@ -84,86 +96,140 @@ exports.throwFnHO = function throwFnHO(error) {
 
 /**
  * Returns a resolved Promise
- * @param  {String} value Resolved value
- * @return {Promise.Mixed} Promise resoved with given value
+ * @param {String} value - Resolved value
+ * @return {Promise<Any>} Promise resoved with given value
  */
 exports.resolveFn = function resolveFn(value) {
-    return Promise.resolve(value);
+    return BPromise.resolve(value);
 };
 
 /**
  * Returns a function that return a resolved Promise with given value
- * @param  {String} value Resolved value
- * @return {Function} Function that return a resolved Promise with given value
+ * @param  {String} value - Resolved value
+ * @return {Function} Function that returns a resolved Promise with given value
  */
-//exports.resolveFnHO = function resolveFnHO(value) {
-//return () => exports.resolveFn(value);
-//}
+exports.resolveFnHO = function resolveFnHO(value) {
+    return () => exports.resolveFn(value);
+};
 
 /**
  * Returns a rejected Promise
- * @param  {String} reason Rejection reason
- * @return {Promise.Mixed} Promise rejected with given reason
+ * @param  {String} reason - Rejection reason
+ * @return {Promise<Any>} Promise rejected with given reason
  */
-//exports.rejectFn = function rejectFn(reason) {
-//return Promise.reject(reason);
-//}
+exports.rejectFn = function rejectFn(reason) {
+    return BPromise.reject(reason);
+};
 
 /**
  * Returns a function that return a rejected Promise with given reason
- * @param  {String} reason Rejection reason
+ * @param  {String} reason - Rejection reason
  * @return {Function} Function that return a rejected Promise with given reason
  */
 //exports.rejectFnHO = function rejectFnHO(reason) {
 //return () => exports.rejectFn(reason);
-//}
+//};
 
 // Module names, based on project root, to ensure consistency across tests
-exports.path = "path";
-exports.lodash = "lodash";
-exports.tape = "tape";
-exports.proxyquire = "proxyquire";
-exports.express = "express";
-
 exports.config = path.resolve("src/config");
 exports.utils = path.resolve("src/lib/utils");
-exports.middlewares = path.resolve("src/lib/middlewares");
+exports.middlewareLoader = path.resolve("src/lib/middlewares");
 
 // Default stubs that will be used across tests
 // Any new dependency must be added here to be stubbed
 const defaultStubs = {
 
     // External dependencies
-    [exports.path]: path,
-    [exports.lodash]: lodash,
-    [exports.tape]: {
+    path: path,
+    lodash: lodash,
+    tape: {
         '@noCallThru': true
     },
-    [exports.proxyquire]: proxyquire,
-    [exports.express]: {
-        '@noCallThru': true
-    },
-
-    // Internal dependencies
-    [exports.config]: {
-        '@noCallThru': true
-    },
-    [exports.utils]: {
-        '@noCallThru': true
-    },
-    [exports.middlewares]: {
+    proxyquire: proxyquire,
+    express: {
         '@noCallThru': true
     }
+};
+// Internal dependencies
+defaultStubs[exports.config] = {
+    '@noCallThru': true
+};
+defaultStubs[exports.utils] = {
+    '@noCallThru': true
+};
+defaultStubs[exports.middlewareLoader] = {
+    '@noCallThru': true
 };
 
 /**
  * Require a proxified module with defaultStubs eventually overloaded with
  * custom stubs
- * @param  {String} moduleName Proxified module name
- * @param  {Object} customStubs Custom stubs for the proxified module
- * @return {Object} Required proxified module
+ * @param  {String} moduleName - Proxified module name
+ * @param  {Object} customStubs - Custom stubs for the proxified module
+ * @return {Any} Required proxified module
  */
 exports.prepareStubs = lodash.curry(
     function prepareStubs(moduleName, customStubs) {
-        return proxyquire(moduleName, lodash.merge({}, defaultStubs, customStubs));
+        return proxyquire(moduleName, lodash.flow(
+            lodash.merge(exports.convertIntoComputedProperties(customStubs)),
+            lodash.merge(defaultStubs)
+        )({}));
     });
+
+
+// Default that will be used for factories
+// Any new dependency must be added here to be stubbed
+const defaultContext = {
+    utils: {
+        getLogger: exports.nullFnHO
+    }
+};
+
+/**
+ * Convert an object into another object with computed properties by using the given
+ * object properties names as variables declared in this module
+ * For example, given an object { a: 'foo', b: 'bar' }
+ * this function will return an object { [a]: 'foo', [b]: 'bar' } with a and b
+ * eventually defined as variables in this module.
+ * If they are not defined, this function will assume that they refer to node
+ * modules instead of local ones.
+ *
+ * @param  {Object} object - Input object
+ * @return {Object} Converted object
+ */
+exports.convertIntoComputedProperties = function convertIntoComputedProperties(object) {
+    const newObj = {};
+    const keys = lodash.keys(object);
+    lodash.map(function(property) {
+            if (exports[property]) {
+                newObj[exports[property]] = object[property];
+            } else {
+                newObj[property] = object[property];
+            }
+        },
+        keys
+    );
+    return newObj;
+};
+
+/**
+ * Require a module and create an instance with defaultStubs eventually overloaded with
+ * custom context
+ * @param  {String} moduleName - Module name
+ * @param  {Object} customContext - Custom context for the module factory
+ * @return {Object} Required module instance
+ */
+exports.prepareInstance = lodash.curry(
+    function prepareInstance(moduleName, customContext) {
+        return require(moduleName).factory(lodash.flow(
+            lodash.merge(customContext),
+            lodash.merge(defaultContext)
+        )({}));
+    });
+
+/**
+ * Stubbin and spying functions exports
+ * To abstract Sinon.js in tests
+ */
+exports.stub = sinon.stub;
+exports.spy = sinon.spy;
