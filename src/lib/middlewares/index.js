@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 const lodash = require("lodash/fp");
 const BPromise = require("bluebird");
 
 exports.factory = function factory(context) {
 
-    const utils = lodash.get('utils', context);
-    const config = lodash.get('config', context);
+    const utils = lodash.get("utils", context);
+    const config = lodash.get("config", context);
 
     const curry = lodash.curry;
     const flow = lodash.flow;
@@ -14,18 +14,8 @@ exports.factory = function factory(context) {
     const map = lodash.map;
     const tap = lodash.tap;
 
-    const requireFromProjectRoot = lodash.get('requireFromProjectRoot', utils);
-    const getLogger = lodash.get('getLogger', utils);
-
-    //const {
-    //utils,
-    //config
-    //} = context;
-    //const {
-    //curry, flow, get, map, tap,
-    //requireFromProjectRoot,
-    //getLogger
-    //} = utils;
+    const requireFromProjectRoot = lodash.get("requireFromProjectRoot", utils);
+    const getLogger = lodash.get("getLogger", utils);
 
     const log = getLogger(context);
 
@@ -47,7 +37,9 @@ exports.factory = function factory(context) {
      * @return {Promise} Fulfilled on success
      */
     instance.initMiddleware = function initMiddleware(middleware) {
-        return middleware(context);
+        if (lodash.has("factory", middleware)) {
+            return middleware.factory(context);
+        }
     };
 
     /*
