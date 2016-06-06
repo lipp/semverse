@@ -14,7 +14,7 @@ exports.factory = function factory(context) {
     const map = lodash.map;
     const tap = lodash.tap;
 
-    const requireFromProjectRoot = lodash.get("requireFromProjectRoot", utils);
+    const requireMiddleware = lodash.get("requireMiddleware", utils);
     const getLogger = lodash.get("getLogger", utils);
 
     const log = getLogger(context);
@@ -33,13 +33,16 @@ exports.factory = function factory(context) {
 
     /*
      * Initialize a middleware with the current context
-     * @param  {Function} middleware - Middlewre function
+     * @param  {Function} middleware - Middleware function
      * @return {Promise} Fulfilled on success
      */
     instance.initMiddleware = function initMiddleware(middleware) {
         if (lodash.has("factory", middleware)) {
             return middleware.factory(context);
         }
+        return BPromise.reject(
+            new Error(`Middleware is missing a factory method: ${middleware}`)
+        );
     };
 
     /*
@@ -68,7 +71,7 @@ exports.factory = function factory(context) {
                 // Log it
                 tap((a) => log("debug", `Middleware list: ${JSON.stringify(a)}`)),
                 // Require everything
-                map(requireFromProjectRoot),
+                map(requireMiddleware),
                 // Call all middlewares factories to get middleware instances
                 map(instance.initMiddleware),
                 // Wait for all initializations to resolve

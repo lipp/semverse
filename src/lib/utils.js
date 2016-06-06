@@ -9,15 +9,14 @@ const {
 
 exports.getLogger = () => console.log;
 
-/* Require a module from the project Root directory
- * @param   {String}    moduleName      Module name
- * @return  {Mixed}                     Module exports
+/* Require a middleware, e.g. a module located in /lib/middlewares
+ * @param   {String} moduleName - Module name
+ * @return  {Mixed} Module exports
  */
-exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
-    const projectRoot = path.resolve(__dirname, '../');
+exports.requireMiddleware = function requireMiddleware(moduleName) {
+    const projectRoot = path.resolve(__dirname, '../lib/middlewares');
     return require(path.join(projectRoot, moduleName));
 };
-
 
 /* Mutate response
  * @param  {Object} res - Response reference
@@ -26,10 +25,9 @@ exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
  * @return {Undefined} Nothing
  */
 exports.sendBack = function sendBack(res, status, content) {
-    const resStatus = get("status", res);
-    const resJson = get("json", res);
-    if (isFunction(resStatus) && isFunction(resJson)) {
-        resStatus(status);
-        resJson(content);
+    if (isFunction(get("status", res)) && isFunction(get("json", res))) {
+        res
+            .status(status)
+            .json(content);
     }
 };

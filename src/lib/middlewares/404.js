@@ -3,9 +3,10 @@
 const lodash = require("lodash/fp");
 const BPromise = require("bluebird");
 
-/* Initialize Error middleware
+/* Initialize PageNotFound middleware
+ * This is a simple middleware that will answer any request with a 404 error
  * @param  {Object} context - Current context
- * @return {Promise<Function>} Error handler middleware function
+ * @return {Promise<Function>} PageNotFound middleware function
  */
 exports.factory = (context) => BPromise
     .try(function() {
@@ -15,12 +16,12 @@ exports.factory = (context) => BPromise
 
         const sendBack = get("utils.sendBack", context);
 
-        log("info", 'Adding Error handler');
+        log("info", 'Adding PageNotFound handler');
 
-        return function errorMiddleware(error, req, res, next) {
-            log("error", `An error has not been handled internally ${get("stack", error)}`);
+        return function pageNotFoundMiddleware(req, res, next) {
+            log("error", `A request tried to access an unknown page`);
             log("error", `Request was ${get("method", req)} ${get("path", req)}`);
-            sendBack(res, 500, error);
-            next(error);
+            sendBack(res, 404);
+            next();
         };
     });

@@ -6,7 +6,8 @@ const {
     t,
     prepareStubs,
     nullFn,
-    spy
+    spy,
+    createResponseMock
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareStubs(path.resolve(__dirname, "./utils"));
@@ -22,15 +23,15 @@ t("Utils library", function(t) {
         });
     });
 
-    t("requireFromProjectRoot()", function(t) {
-        t.test("when given a module name", function(t) {
+    t("requireMiddleware()", function(t) {
+        t.test("when given a middleware name", function(t) {
             t.doesNotThrow(
                 m({
                     path: {
                         resolve: nullFn,
                         join: () => path.resolve("src/lib/test-helpers")
                     }
-                }).requireFromProjectRoot,
+                }).requireMiddleware,
                 "should not throw");
             t.end();
         });
@@ -44,10 +45,7 @@ t("Utils library", function(t) {
             t.end();
         });
         t.test("when given a valid response reference", function(t) {
-            const res = {
-                status: nullFn,
-                json: nullFn
-            };
+            const res = createResponseMock();
             const statusSpy = spy(res, "status");
             const jsonSpy = spy(res, "json");
             m({}).sendBack(res);
