@@ -143,22 +143,22 @@ const defaultStubs = {
     path: path,
     lodash: lodash,
     tape: {
-        '@noCallThru': true
+        "@noCallThru": true
     },
     proxyquire: proxyquire,
     express: {
-        '@noCallThru': true
+        "@noCallThru": true
     }
 };
 // Internal dependencies
 defaultStubs[exports.config] = {
-    '@noCallThru': true
+    "@noCallThru": true
 };
 defaultStubs[exports.utils] = {
-    '@noCallThru': true
+    "@noCallThru": true
 };
 defaultStubs[exports.middlewareLoader] = {
-    '@noCallThru': true
+    "@noCallThru": true
 };
 
 /**
@@ -188,8 +188,8 @@ const defaultContext = {
 /**
  * Convert an object into another object with computed properties by using the given
  * object properties names as variables declared in this module
- * For example, given an object { a: 'foo', b: 'bar' }
- * this function will return an object { [a]: 'foo', [b]: 'bar' } with a and b
+ * For example, given an object { a: "foo", b: "bar" }
+ * this function will return an object { [a]: "foo", [b]: "bar" } with a and b
  * eventually defined as variables in this module.
  * If they are not defined, this function will assume that they refer to node
  * modules instead of local ones.
