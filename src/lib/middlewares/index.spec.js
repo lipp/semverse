@@ -31,11 +31,20 @@ t("Middleware loader", function(t) {
     });
 
     t("initMiddleware()", function(t) {
+        t.test("when not given a middleware", function(t) {
+            t.equal(
+                m({}).initMiddleware(),
+                undefined,
+                "should return undefined");
+            t.end();
+        });
         t.test("when given a middleware", function(t) {
             t.equal(
                 m({
                     foo: 'bar'
-                }).initMiddleware((a) => a).foo,
+                }).initMiddleware({
+                    factory: (a) => a
+                }).foo,
                 'bar',
                 "should call the middleware with the current context");
             t.end();

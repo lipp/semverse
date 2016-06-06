@@ -3,17 +3,9 @@
 const path = require("path");
 
 const {
-    curry,
-    flow,
     get,
-    map,
-    tap
+    isFunction
 } = require("lodash/fp");
-exports.curry = curry;
-exports.flow = flow;
-exports.get = get;
-exports.map = map;
-exports.tap = tap;
 
 exports.getLogger = () => console.log;
 
@@ -26,23 +18,18 @@ exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
     return require(path.join(projectRoot, moduleName));
 };
 
-/* Require a module based on its test name
- * @param   {String}    testFileName    Tested module name
- * @return  {Mixed}                     Module exports
- */
-//function requireTestedModule(testFileName) {
-//const
-//r = /([\w\/]*)tests\/(unit|e2e)\/([\w\/]*)/,
-//result = r.exec(testFileName);
-//return result
-//? require(result[1] + result[3])
-//: null;
-//}
 
-/* Require a middleware
- * @param   {String}    middleware      Tested module name
- * @return  {Mixed}                     Module exports
+/* Mutate response
+ * @param  {Object} res - Response reference
+ * @param  {Number} status - Response status
+ * @param  {Object} content - Content to be sent back
+ * @return {Undefined} Nothing
  */
-//function requireMiddleware(middleware) {
-//return require(path.resolve(__dirname, middleware));
-//}
+exports.sendBack = function sendBack(res, status, content) {
+    const resStatus = get("status", res);
+    const resJson = get("json", res);
+    if (isFunction(resStatus) && isFunction(resJson)) {
+        resStatus(status);
+        resJson(content);
+    }
+};
