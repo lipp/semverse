@@ -9,16 +9,17 @@ const BPromise = require("bluebird");
  */
 exports.factory = (context) => BPromise
     .try(function() {
-        const getLogger = lodash.get("utils.getLogger", context);
+        const get = lodash.get;
+        const getLogger = get("utils.getLogger", context);
         const log = getLogger(context);
 
-        const sendBack = lodash.get("utils.sendBack", context);
+        const sendBack = get("utils.sendBack", context);
 
         log("info", 'Adding Error handler');
 
         return function errorMiddleware(error, req, res, next) {
-            log("error", `An error has not been handled internally ${error.stack}`);
-            log("error", `Request was ${lodash.get(req, "method")} / ${lodash.get(req, "path")}`);
+            log("error", `An error has not been handled internally ${get("stack", error)}`);
+            log("error", `Request was ${get("method", req)} ${get("path", req)}`);
             sendBack(res, 500, error);
             next(error);
         };
