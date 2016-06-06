@@ -31,13 +31,10 @@ t("Middleware loader", function(t) {
     });
 
     t("initMiddleware()", function(t) {
-        t.test("when not given a middleware", function(t) {
-            t.equal(
-                m({}).initMiddleware(),
-                undefined,
-                "should return undefined");
-            t.end();
-        });
+        t.test("when not given a middleware", (t) =>
+            m({}).initMiddleware()
+            .catch(() => t.pass("should a rejected promise"))
+        );
         t.test("when given a middleware", function(t) {
             t.equal(
                 m({
@@ -112,7 +109,7 @@ t("Middleware loader", function(t) {
                     middlewareList: ['foo']
                 },
                 utils: {
-                    requireFromProjectRoot: (a) => a
+                    requireMiddleware: (a) => a
                 }
             });
             stub(testModule, 'initMiddleware', resolveFn);

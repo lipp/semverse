@@ -14,6 +14,7 @@ const {
 const m = prepareStubs(path.resolve(__dirname, "./test-helpers"));
 
 t("Test helpers library", function(t) {
+
     t("unitTest()", function(t) {
         t.test("when given a unit test", function(t) {
             t.equal(
@@ -23,6 +24,7 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("idFn()", function(t) {
         t.test("when given any input", function(t) {
             t.equal(
@@ -32,6 +34,7 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("nullFn()", function(t) {
         t.test("when given any input", function(t) {
             t.equal(
@@ -41,6 +44,7 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("nullFnHO()", function(t) {
         t.test("when given any input", function(t) {
             t.equal(
@@ -50,6 +54,7 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("throwFn()", function(t) {
         t.test("when given any input", function(t) {
             t.throws(
@@ -58,6 +63,7 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("throwFnHO()", function(t) {
         t.test("when given any input", function(t) {
             t.throws(
@@ -66,16 +72,32 @@ t("Test helpers library", function(t) {
             t.end();
         });
     });
+
     t("resolveFn()", function(t) {
         t.test("when given any input", (t) =>
             m({}).resolveFn()
             .then(() => t.pass("should return a resolved Promise"))
         );
     });
+
     t("resolveFnHO()", function(t) {
         t.test("when given any input", (t) =>
             m({}).resolveFnHO()()
             .then(() => t.pass("should return a function that returns a resolved Promise"))
         );
     });
+
+    t("createResponseMock()", function(t) {
+        t.test("in all cases", function(t) {
+            const result = m({}).createResponseMock();
+            t.equal(typeof result, "object",
+                "should return an object");
+            t.equal(result.status("foo").status, "foo",
+                "that has a status method which alter the response status");
+            t.equal(result.json("foo").body, "foo",
+                "and a json method which alter the response body");
+            t.end();
+        });
+    });
+
 });

@@ -233,3 +233,20 @@ exports.prepareInstance = lodash.curry(
  */
 exports.stub = sinon.stub;
 exports.spy = sinon.spy;
+
+/**
+ * Create an Express-like response mock
+ * @return {Object} Response mock
+ */
+exports.createResponseMock = function createResponseMock() {
+    const response = {};
+    response.status = function(status) {
+        response.status = status;
+        return response;
+    };
+    response.json = function(body) {
+        response.body = body;
+        return response;
+    };
+    return response;
+};
