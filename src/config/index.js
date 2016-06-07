@@ -1,3 +1,11 @@
+/**
+ * ### Main configuration loader
+ *
+ * This module is in charge of loading and overloading all config files in
+ * order of importance.
+ *
+ * @module Configuration/Loader
+ */
 "use strict";
 module.exports = {
     middlewareList: ["error", "404"]

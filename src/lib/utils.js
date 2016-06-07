@@ -1,3 +1,11 @@
+/**
+ * ### Utilities library
+ *
+ * All functions that are not related to a specific logic and that can be
+ * reused across modules
+ *
+ * @module Library/Utilities
+ */
 "use strict";
 
 const path = require("path");
@@ -9,7 +17,8 @@ const {
 
 exports.getLogger = () => console.log;
 
-/* Require a middleware, e.g. a module located in /lib/middlewares
+/**
+ * Require a middleware, e.g. a module located in /lib/middlewares
  * @param   {String} moduleName - Module name
  * @return  {Mixed} Module exports
  */
@@ -18,7 +27,8 @@ exports.requireMiddleware = function requireMiddleware(moduleName) {
     return require(path.join(projectRoot, moduleName));
 };
 
-/* Mutate response
+/**
+ * Mutate response
  * @param  {Object} res - Response reference
  * @param  {Number} status - Response status
  * @param  {Object} content - Content to be sent back
