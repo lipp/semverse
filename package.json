@@ -1,11 +1,11 @@
 {
     "name": "semverse",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "A small universe, SemVer based",
     "main": "index.js",
     "config": {},
     "scripts": {
-        "docs": "jsdoc -r -d docs -R ./README.md -P ./package.json --debug src/index.js",
+        "docs": "jsdoc -c jsdoc.json",
         "lint": "jslint 'src/**/*.js'",
         "tape-console": "NODE_ENV=test tape 'src/**/*.spec.js'",
         "tape-faucet": "npm run tape-console | faucet",
