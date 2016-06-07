@@ -1,3 +1,10 @@
+/**
+ * ### Entities controller
+ *
+ * This controller is in charge of handling all publicly exposed entites logic
+ *
+ * @module API/Controllers/Entities
+ */
 //'use strict';
 
 //const _ = require('lodash');

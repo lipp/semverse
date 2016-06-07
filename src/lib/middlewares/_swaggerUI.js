@@ -1,9 +1,17 @@
+/**
+ * ### SwaggerUI Middleware
+ *
+ * This middleware handle Swagger UI access
+ *
+ * @module Middlewares/Swagger-UI
+ */
 //'use strict';
 
 //const swaggerUI = require('swagger-tools/middleware/swagger-ui');
 //const spec = require('../../api/swagger.json');
 
-/* Initialize Swagger UI middleware
+/**
+ * Initialize Swagger UI middleware
  * @param  {Object}     utils       Utility functions library reference
  * @param  {Object}     config      Config reference
  * @param  {Object}     log         Log function reference

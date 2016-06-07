@@ -1,9 +1,18 @@
+/**
+ * ### 404 Middleware
+ *
+ * This middleware send back a 404 response status for each request.
+ * It has to be loaded after all other meaningful middlewares.
+ *
+ * @module Middlewares/404
+ */
 "use strict";
 
 const lodash = require("lodash/fp");
 const BPromise = require("bluebird");
 
-/* Initialize PageNotFound middleware
+/**
+ * Initialize PageNotFound middleware
  * This is a simple middleware that will answer any request with a 404 error
  * @param  {Object} context - Current context
  * @return {Promise<Function>} PageNotFound middleware function
