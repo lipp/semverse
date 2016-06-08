@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/middlewares/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lib/middlewares/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * ### Middleware loader
+ *
+ * This module loads middlewares as they are set in the current configuration
+ *
+ * @module Middlewares/Loader
+ */
+"use strict";
+
+const lodash = require("lodash/fp");
+const BPromise = require("bluebird");
+
+exports.factory = function factory(context) {
+
+    const utils = lodash.get("utils", context);
+    const config = lodash.get("config", context);
+
+    const curry = lodash.curry;
+    const flow = lodash.flow;
+    const get = lodash.get;
+    const map = lodash.map;
+    const tap = lodash.tap;
+
+    const requireMiddleware = lodash.get("requireMiddleware", utils);
+    const getLogger = lodash.get("getLogger", utils);
+
+    const log = getLogger(context);
+
+    const instance = {};
+
+    /**
+     * @name registerMiddleware
+     * @description Register a middleware
+     * @curried
+     * @param  {Object} app - App reference
+     * @param  {Function} middleware - Middleware function
+     * @return {Boolean} True on success
+     */
+    instance.registerMiddleware = curry((app, middleware) => app.use(middleware));
+
+    /**
+     * Initialize a middleware with the current context
+     * @param  {Function} middleware - Middleware function
+     * @return {Promise} Fulfilled on success
+     */
+    instance.initMiddleware = function initMiddleware(middleware) {
+        if (lodash.has("factory", middleware)) {
+            return middleware.factory(context);
+        }
+        return BPromise.reject(
+            new Error(`Middleware is missing a factory method: ${middleware}`)
+        );
+    };
+
+    /**
+     * Config port getter. Default is 9100
+     * @return {Number} Configured port
+     */
+    instance.getPort = function getPort() {
+        return get("service.port", config) || 9100;
+    };
+
+    /**
+     * Middleware loader
+     * Pull all middleware names from config and register them in the app
+     * @param  {Object} app - Service reference
+     * @return {Promise} Fulfilled when all middlewares are initialized
+     */
+    instance.loadMiddlewares = function loadMiddlewares(app) {
+        log("debug", `Config is ${JSON.stringify(config)}`);
+        log("info", `Loading middlewares...`);
+        return BPromise
+            .try(() => flow(
+                // Retrieve the middleware list from the config
+                get("service.middlewareList"),
+                // Handle empty middlewareList cases
+                (a) => a || [],
+                // Log it
+                tap((a) => log("debug", `Middleware list: ${JSON.stringify(a)}`)),
+                // Require everything
+                map(requireMiddleware),
+                // Call all middlewares factories to get middleware instances
+                map(instance.initMiddleware),
+                // Wait for all initializations to resolve
+                (middlewarePromises) => BPromise.all(middlewarePromises),
+                // Then register them in the service
+                (allresolved) => allresolved
+                .then(map(instance.registerMiddleware(app)))
+                .then(() => log("info", `Successfully intitialized middlewares`))
+                .catch(function(error) {
+                    log("error", `Error while loading middlewares: ${error}`);
+                    return BPromise.reject(error);
+                })
+            )(config));
+    };
+
+    /**
+     * Service starter
+     * Init all middlewares and make the app listen on config hostname/port
+     * @param  {Object} app - Service reference
+     * @return {Promise} Fulfilled when instance is successfully started
+     */
+    instance.startInstance = function startInstance(app) {
+        return BPromise
+            .try(function() {
+                const port = instance.getPort();
+                log("info", `Starting service instance on port ${port}...`);
+                return instance.loadMiddlewares(app)
+                    .then(() => app.listen(
+                        port, () => log("info",
+                            `Service instance successfully started`
+                        )
+                    ))
+                    .catch(function(error) {
+                        log("critical",
+                            `Fatal error while starting the service instance: ${error}`
+                        );
+                        return BPromise.reject(error);
+                    });
+            });
+    };
+
+    return instance;
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_Controllers_Entities.html">API/Controllers/Entities</a></li><li><a href="module-Configuration_Default.html">Configuration/Default</a></li><li><a href="module-Configuration_Environment.html">Configuration/Environment</a></li><li><a href="module-Configuration_Loader.html">Configuration/Loader</a></li><li><a href="module-Library_Test-Helpers.html">Library/Test-Helpers</a></li><li><a href="module-Library_Utilities.html">Library/Utilities</a></li><li><a href="module-Main.html">Main</a></li><li><a href="module-Middlewares_404.html">Middlewares/404</a></li><li><a href="module-Middlewares_Error.html">Middlewares/Error</a></li><li><a href="module-Middlewares_Loader.html">Middlewares/Loader</a></li><li><a href="module-Middlewares_Swagger-UI.html">Middlewares/Swagger-UI</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jun 08 2016 17:44:54 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

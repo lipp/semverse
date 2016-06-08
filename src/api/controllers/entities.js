@@ -7,10 +7,16 @@
  */
 //'use strict';
 
-//const _ = require('lodash');
-//const swUtils = require('../swaggerUtils');
+//const lodash = require('lodash/fp');
 
-//module.exports = {
+/**
+ * Initialize Entities controller instance
+ * @param  {Object} log - Log function reference
+ * @return {Promise<Function>} Swagger UI middleware function
+ */
+//exports.factory = (context) => BPromise
+//.try(function () {
+
     //// List entities based on given criterias
     //listEntities: (req, res) => Promise
         //.resolve(_.get(req, 'params.order'))
@@ -24,4 +30,4 @@
         //.then(models.entities.create)
         //.then(() => respond(201, {}))
         //.catch(swUtils.errorHandler)
-//}
+//});
