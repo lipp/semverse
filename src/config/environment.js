@@ -5,7 +5,7 @@
  *
  * @module Configuration/Environment
  */
-'use strict';
+"use strict";
 module.exports = {
     // TBD
 };
