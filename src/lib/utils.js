@@ -23,7 +23,7 @@ exports.getLogger = () => console.log;
  * @return  {Mixed} Module exports
  */
 exports.requireMiddleware = function requireMiddleware(moduleName) {
-    const projectRoot = path.resolve(__dirname, '../lib/middlewares');
+    const projectRoot = path.resolve(__dirname, "../lib/middlewares");
     return require(path.join(projectRoot, moduleName));
 };
 

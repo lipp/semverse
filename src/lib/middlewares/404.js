@@ -25,7 +25,7 @@ exports.factory = (context) => BPromise
 
         const sendBack = get("utils.sendBack", context);
 
-        log("info", 'Adding PageNotFound handler');
+        log("info", "Adding PageNotFound handler");
 
         return function pageNotFoundMiddleware(req, res, next) {
             log("error", `A request tried to access an unknown page: ${get("method", req)} ${get("path", req)}`);

@@ -25,7 +25,7 @@ exports.factory = function factory(context) {
 
             const sendBack = get("utils.sendBack", context);
 
-            log("info", 'Adding Error handler');
+            log("info", "Adding Error handler");
 
             return function errorMiddleware(error, req, res, next) {
                 log("error", `An error has not been handled internally ${get("stack", error)}`);

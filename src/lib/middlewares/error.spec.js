@@ -30,7 +30,7 @@ t("Error Middleware", function(t) {
                     sendBack: nullFn
                 }
             })
-            .then((fn) => fn('foo', null, null, (a) => t.equal(a, 'foo',
+            .then((fn) => fn("foo", null, null, (a) => t.equal(a, "foo",
                 "should return a promise fulfilled with an Express Error Middleware")))
         );
     });

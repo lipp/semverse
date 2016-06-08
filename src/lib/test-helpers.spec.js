@@ -18,7 +18,7 @@ t("Test helpers library", function(t) {
     t("unitTest()", function(t) {
         t.test("when given a unit test", function(t) {
             t.equal(
-                m({}).unitTest(() => true, '', '', nullFn),
+                m({}).unitTest(() => true, "", "", nullFn),
                 true,
                 "should call its test engine");
             t.end();
@@ -28,8 +28,8 @@ t("Test helpers library", function(t) {
     t("idFn()", function(t) {
         t.test("when given any input", function(t) {
             t.equal(
-                m({}).idFn('foo'),
-                'foo',
+                m({}).idFn("foo"),
+                "foo",
                 "should return the same value");
             t.end();
         });
