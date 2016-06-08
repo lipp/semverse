@@ -38,11 +38,11 @@ t("Middleware loader", function(t) {
         t.test("when given a middleware", function(t) {
             t.equal(
                 m({
-                    foo: 'bar'
+                    foo: "bar"
                 }).initMiddleware({
                     factory: (a) => a
                 }).foo,
-                'bar',
+                "bar",
                 "should call the middleware with the current context");
             t.end();
         });
@@ -76,14 +76,14 @@ t("Middleware loader", function(t) {
             const testModule = m({
                 config: {
                     service: {
-                        middlewareList: ['foo']
+                        middlewareList: ["foo"]
                     }
                 },
                 utils: {
                     requireFromProjectRoot: nullFn
                 }
             });
-            stub(testModule, 'initMiddleware', rejectFn);
+            stub(testModule, "initMiddleware", rejectFn);
             return testModule
                 .loadMiddlewares()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -97,8 +97,8 @@ t("Middleware loader", function(t) {
                     requireFromProjectRoot: nullFn
                 }
             });
-            stub(testModule, 'initMiddleware', resolveFn);
-            stub(testModule, 'registerMiddleware', nullFn);
+            stub(testModule, "initMiddleware", resolveFn);
+            stub(testModule, "registerMiddleware", nullFn);
             return testModule
                 .loadMiddlewares()
                 .then(() => t.pass("should return a resolved promise"))
@@ -111,15 +111,15 @@ t("Middleware loader", function(t) {
             const testModule = m({
                 config: {
                     service: {
-                        middlewareList: ['foo']
+                        middlewareList: ["foo"]
                     }
                 },
                 utils: {
                     requireMiddleware: (a) => a
                 }
             });
-            stub(testModule, 'initMiddleware', resolveFn);
-            stub(testModule, 'registerMiddleware', (a) => () => a);
+            stub(testModule, "initMiddleware", resolveFn);
+            stub(testModule, "registerMiddleware", (a) => () => a);
             return testModule
                 .loadMiddlewares()
                 .then(() => t.pass("should return a resolved promise"))
@@ -132,7 +132,7 @@ t("Middleware loader", function(t) {
     t("startInstance()", function(t) {
         t.test("when there is a synchronous error", function(t) {
             const testModule = m({});
-            stub(testModule, 'getPort', throwFn);
+            stub(testModule, "getPort", throwFn);
             return testModule
                 .startInstance()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -142,8 +142,8 @@ t("Middleware loader", function(t) {
         });
         t.test("when there is an asynchronous error", function(t) {
             const testModule = m({});
-            stub(testModule, 'getPort', nullFn);
-            stub(testModule, 'loadMiddlewares', rejectFn);
+            stub(testModule, "getPort", nullFn);
+            stub(testModule, "loadMiddlewares", rejectFn);
             return testModule
                 .startInstance()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -154,8 +154,8 @@ t("Middleware loader", function(t) {
         });
         t.test("when given a valid app instance and a valid context", function(t) {
             const testModule = m({});
-            stub(testModule, 'getPort', nullFn);
-            stub(testModule, 'loadMiddlewares', resolveFn);
+            stub(testModule, "getPort", nullFn);
+            stub(testModule, "loadMiddlewares", resolveFn);
             return testModule
                 .startInstance({
                     listen: (ignore, cb) => cb()

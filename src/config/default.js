@@ -6,13 +6,14 @@
  *
  * @module Configuration/Default
  */
-'use strict';
+"use strict";
 module.exports = {
     service: {
         port: 9100,
         middlewareList: [
-            '404',
-            'error'
+            "swaggerUI",
+            "404",
+            "error"
         ]
     }
 };

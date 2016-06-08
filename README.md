@@ -25,7 +25,7 @@ modules, like Swagger, Sequelize and Tape.
 ## Why "SemVerse"
 Because I intend to follow the best practice of all, and since world building will be as incremental as possible, it made sense.
 
-## So how to get started ?
+## How to get started
 Well you can either try my very own instance, or deploy on your heroku account:
 
 [![Deploy in your Heroku now !](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
@@ -33,6 +33,12 @@ Well you can either try my very own instance, or deploy on your heroku account:
 If, as am I, you are more willing to do everything by yourself, you can just clone the repo and `npm start` right away: the default configuration should take care of everything.
 
 See also the [GitHub Page](http://stephanetrebel.github.io/semverse) (Very very WIP)
+
+## How to use
+After starting/deploying the app go with your favorite browser to `/docs` and
+you should see the Swagger UI with the basic controllers.
+
+From that point, well, you're on your own !
 
 ## Contributing
 
