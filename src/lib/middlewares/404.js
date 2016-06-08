@@ -28,8 +28,7 @@ exports.factory = (context) => BPromise
         log("info", 'Adding PageNotFound handler');
 
         return function pageNotFoundMiddleware(req, res, next) {
-            log("error", `A request tried to access an unknown page`);
-            log("error", `Request was ${get("method", req)} ${get("path", req)}`);
+            log("error", `A request tried to access an unknown page: ${get("method", req)} ${get("path", req)}`);
             sendBack(res, 404);
             next();
         };

@@ -57,7 +57,7 @@ exports.factory = function factory(context) {
      * @return {Number} Configured port
      */
     instance.getPort = function getPort() {
-        return get("port", config) || 9100;
+        return get("service.port", config) || 9100;
     };
 
     /**
@@ -72,7 +72,7 @@ exports.factory = function factory(context) {
         return BPromise
             .try(() => flow(
                 // Retrieve the middleware list from the config
-                get("middlewareList"),
+                get("service.middlewareList"),
                 // Handle empty middlewareList cases
                 (a) => a || [],
                 // Log it

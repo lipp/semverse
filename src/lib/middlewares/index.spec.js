@@ -56,11 +56,13 @@ t("Middleware loader", function(t) {
                 "should return 9100");
             t.end();
         });
-        t.test("when given a context that has a config.port property", function(t) {
+        t.test("when given a context that has a service.config.port property", function(t) {
             t.equal(
                 m({
                     config: {
-                        port: 123
+                        service: {
+                            port: 123
+                        }
                     }
                 }).getPort(),
                 123,
@@ -73,7 +75,9 @@ t("Middleware loader", function(t) {
         t.test("when there is an error", function(t) {
             const testModule = m({
                 config: {
-                    middlewareList: ['foo']
+                    service: {
+                        middlewareList: ['foo']
+                    }
                 },
                 utils: {
                     requireFromProjectRoot: nullFn
@@ -106,7 +110,9 @@ t("Middleware loader", function(t) {
         t.test("when given an app and a proper context (config and middleware)", function(t) {
             const testModule = m({
                 config: {
-                    middlewareList: ['foo']
+                    service: {
+                        middlewareList: ['foo']
+                    }
                 },
                 utils: {
                     requireMiddleware: (a) => a
