@@ -147,6 +147,7 @@ exports.rejectFn = function rejectFn(reason) {
 exports.config = path.resolve("src/config");
 exports.utils = path.resolve("src/lib/utils");
 exports.middlewareLoader = path.resolve("src/lib/middlewares");
+exports.swaggerUI = "swagger-tools/middleware/swagger-ui";
 
 // Default stubs that will be used across tests
 // Mixed new dependency must be added here to be stubbed
@@ -171,6 +172,9 @@ defaultStubs[exports.utils] = {
     "@noCallThru": true
 };
 defaultStubs[exports.middlewareLoader] = {
+    "@noCallThru": true
+};
+defaultStubs[exports.swaggerUI] = {
     "@noCallThru": true
 };
 
