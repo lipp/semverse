@@ -40,7 +40,7 @@ t("Utils library", function(t) {
     t("sendBack()", function(t) {
         t.test("when given an invalid response reference", function(t) {
             t.doesNotThrow(() =>
-                m({}).sendBack(),
+                m({}).sendBack(null, null, null),
                 "should not throw");
             t.end();
         });
@@ -48,7 +48,7 @@ t("Utils library", function(t) {
             const res = createResponseMock();
             const statusSpy = spy(res, "status");
             const jsonSpy = spy(res, "json");
-            m({}).sendBack(res);
+            m({}).sendBack(res, null, null);
             t.equal(
                 statusSpy.called && jsonSpy.called,
                 true,
@@ -56,4 +56,19 @@ t("Utils library", function(t) {
             t.end();
         });
     });
+
+    t("logAndReject()", function(t) {
+        t.test("when not given a log function", function(t) {
+            t.throws(() =>
+                m({}).logAndReject(null, null, null),
+                "should throw");
+            t.end();
+        });
+        t.test("when given a log function", (t) =>
+            m({})
+            .logAndReject(nullFn, null, null)
+            .catch(() => t.pass("should return a rejected promise"))
+        );
+    });
+
 });
