@@ -15,9 +15,7 @@ const spec = require("../../api/swagger.json");
 
 /**
  * Initialize Swagger UI middleware
- * @param  {Object} utils - Utility functions library reference
- * @param  {Object} config - Config reference
- * @param  {Object} log - Log function reference
+ * @param  {Object} context - Current context
  * @return {Promise<Function>} Swagger UI middleware function
  */
 exports.factory = (context) => BPromise
