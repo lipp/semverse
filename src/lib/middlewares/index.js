@@ -20,6 +20,7 @@ exports.factory = function factory(context) {
     const get = lodash.get;
     const map = lodash.map;
     const tap = lodash.tap;
+    const flattenDeep = lodash.flattenDeep;
 
     const requireMiddleware = lodash.get("requireMiddleware", utils);
     const getLogger = lodash.get("getLogger", utils);
@@ -85,10 +86,11 @@ exports.factory = function factory(context) {
                 (middlewarePromises) => BPromise.all(middlewarePromises),
                 // Then register them in the service
                 (allresolved) => allresolved
+                .then(flattenDeep)
                 .then(map(instance.registerMiddleware(app)))
                 .then(() => log("info", `Successfully intitialized middlewares`))
                 .catch(function(error) {
-                    log("error", `Error while loading middlewares: ${error}`);
+                    log("error", `Error while loading middlewares: ${error.toString()}`);
                     return BPromise.reject(error);
                 })
             )(config));

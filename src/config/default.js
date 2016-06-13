@@ -11,7 +11,7 @@ module.exports = {
     service: {
         port: 9100,
         middlewareList: [
-            "swaggerUI",
+            "swagger",
             "404",
             "error"
         ]
