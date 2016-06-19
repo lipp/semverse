@@ -3,19 +3,16 @@
 const path = require("path");
 
 const {
-    // Primary test functions
     t,
-    prepareStubs,
+    prepareForTests,
     stub,
-
-    // Helpers
     nullFn,
     nullFnHO,
     throwFnHO,
     rejectFn
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareStubs(path.resolve(__dirname, "./index"));
+const m = prepareForTests(__filename, null);
 
 t("Service starter", function(t) {
     t("instanciateService()", function(t) {

@@ -1,48 +1,72 @@
+/**
+ * ### Utilities library
+ *
+ * All functions that are not related to a specific logic and that can be
+ * reused across modules
+ *
+ * @module Library/Utilities
+ */
 "use strict";
 
 const path = require("path");
+const {
+    curry
+} = require("lodash/fp");
+const BPromise = require("bluebird");
 
 const {
-    curry,
-    flow,
     get,
-    map,
-    tap
+    isFunction
 } = require("lodash/fp");
-exports.curry = curry;
-exports.flow = flow;
-exports.get = get;
-exports.map = map;
-exports.tap = tap;
 
 exports.getLogger = () => console.log;
 
-/* Require a module from the project Root directory
- * @param   {String}    moduleName      Module name
- * @return  {Mixed}                     Module exports
+/**
+ * Compute a module absolute path from its root based path
+ * @param {String} relativePath - Module relative path from project root
+ * @return {String} Module absolute path
  */
-exports.requireFromProjectRoot = function requireFromProjectRoot(moduleName) {
-    const projectRoot = path.resolve(__dirname, '../');
-    return require(path.join(projectRoot, moduleName));
+exports.getModulePath = function getModulePath(relativePath) {
+    const projectRoot = path.resolve(__dirname, "../");
+    return path.join(projectRoot, relativePath);
 };
 
-/* Require a module based on its test name
- * @param   {String}    testFileName    Tested module name
- * @return  {Mixed}                     Module exports
+/**
+ * Require a middleware, e.g. a module located in <project_root>/lib/middlewares
+ * @param {String} moduleName - Module name
+ * @return {Mixed} Module exports
  */
-//function requireTestedModule(testFileName) {
-//const
-//r = /([\w\/]*)tests\/(unit|e2e)\/([\w\/]*)/,
-//result = r.exec(testFileName);
-//return result
-//? require(result[1] + result[3])
-//: null;
-//}
+exports.requireMiddleware = function requireMiddleware(moduleName) {
+    return require(exports.getModulePath(path.join("lib/middlewares", moduleName)));
+};
 
-/* Require a middleware
- * @param   {String}    middleware      Tested module name
- * @return  {Mixed}                     Module exports
+/**
+ * @name sendBack
+ * @description Mutate response
+ * @curried
+ * @param {Object} res - Response reference
+ * @param {Number} status - Response status
+ * @param {Object} content - Content to be sent back
+ * @return {Undefined} Nothing
  */
-//function requireMiddleware(middleware) {
-//return require(path.resolve(__dirname, middleware));
-//}
+exports.sendBack = curry(function sendBack(res, status, content) {
+    if (isFunction(get("status", res)) && isFunction(get("json", res))) {
+        res
+            .status(status)
+            .json(content);
+    }
+});
+
+/**
+ * @name logAndReject
+ * @description Log an error and reject it again
+ * @curried
+ * @param {String} logFn - Log function
+ * @param {String} message - Message that will be logged
+ * @param {Object} error - Error object
+ * @return {Promise<Error>} Same error object
+ */
+exports.logAndReject = curry(function logAndReject(logFn, message, error) {
+    logFn(message);
+    return BPromise.reject(error);
+});

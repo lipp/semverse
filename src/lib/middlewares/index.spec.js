@@ -3,11 +3,8 @@
 const path = require("path");
 
 const {
-    // Primary test functions
     t,
-    prepareInstance,
-
-    // Helpers
+    prepareForTests,
     nullFn,
     throwFn,
     resolveFn,
@@ -15,13 +12,13 @@ const {
     stub
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareInstance(path.resolve(__dirname, "./index"));
+const m = prepareForTests(__filename);
 
 t("Middleware loader", function(t) {
     t("registerMiddleware()", function(t) {
         t.test("when given an Express-like service and a middleware", function(t) {
             t.equal(
-                m({}).registerMiddleware({
+                m({}, {}).registerMiddleware({
                     use: () => true
                 }, null),
                 true,
@@ -31,12 +28,18 @@ t("Middleware loader", function(t) {
     });
 
     t("initMiddleware()", function(t) {
+        t.test("when not given a middleware", (t) =>
+            m({}, {}).initMiddleware()
+            .catch(() => t.pass("should a rejected promise"))
+        );
         t.test("when given a middleware", function(t) {
             t.equal(
                 m({
-                    foo: 'bar'
-                }).initMiddleware((a) => a).foo,
-                'bar',
+                    foo: "bar"
+                }, {}).initMiddleware({
+                    factory: (a) => a
+                }).foo,
+                "bar",
                 "should call the middleware with the current context");
             t.end();
         });
@@ -45,18 +48,20 @@ t("Middleware loader", function(t) {
     t("getPort()", function(t) {
         t.test("when given a context that does not have a config.port property", function(t) {
             t.equal(
-                m({}).getPort(),
+                m({}, {}).getPort(),
                 9100,
                 "should return 9100");
             t.end();
         });
-        t.test("when given a context that has a config.port property", function(t) {
+        t.test("when given a context that has a service.config.port property", function(t) {
             t.equal(
                 m({
                     config: {
-                        port: 123
+                        service: {
+                            port: 123
+                        }
                     }
-                }).getPort(),
+                }, {}).getPort(),
                 123,
                 "should return the configured port");
             t.end();
@@ -67,13 +72,15 @@ t("Middleware loader", function(t) {
         t.test("when there is an error", function(t) {
             const testModule = m({
                 config: {
-                    middlewareList: ['foo']
+                    service: {
+                        middlewareList: ["foo"]
+                    }
                 },
                 utils: {
                     requireFromProjectRoot: nullFn
                 }
-            });
-            stub(testModule, 'initMiddleware', rejectFn);
+            }, {});
+            stub(testModule, "initMiddleware", rejectFn);
             return testModule
                 .loadMiddlewares()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -86,9 +93,9 @@ t("Middleware loader", function(t) {
                 utils: {
                     requireFromProjectRoot: nullFn
                 }
-            });
-            stub(testModule, 'initMiddleware', resolveFn);
-            stub(testModule, 'registerMiddleware', nullFn);
+            }, {});
+            stub(testModule, "initMiddleware", resolveFn);
+            stub(testModule, "registerMiddleware", nullFn);
             return testModule
                 .loadMiddlewares()
                 .then(() => t.pass("should return a resolved promise"))
@@ -100,14 +107,16 @@ t("Middleware loader", function(t) {
         t.test("when given an app and a proper context (config and middleware)", function(t) {
             const testModule = m({
                 config: {
-                    middlewareList: ['foo']
+                    service: {
+                        middlewareList: ["foo"]
+                    }
                 },
                 utils: {
-                    requireFromProjectRoot: (a) => a
+                    requireMiddleware: (a) => a
                 }
-            });
-            stub(testModule, 'initMiddleware', resolveFn);
-            stub(testModule, 'registerMiddleware', (a) => () => a);
+            }, {});
+            stub(testModule, "initMiddleware", resolveFn);
+            stub(testModule, "registerMiddleware", (a) => () => a);
             return testModule
                 .loadMiddlewares()
                 .then(() => t.pass("should return a resolved promise"))
@@ -119,8 +128,8 @@ t("Middleware loader", function(t) {
     });
     t("startInstance()", function(t) {
         t.test("when there is a synchronous error", function(t) {
-            const testModule = m({});
-            stub(testModule, 'getPort', throwFn);
+            const testModule = m({}, {});
+            stub(testModule, "getPort", throwFn);
             return testModule
                 .startInstance()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -129,9 +138,9 @@ t("Middleware loader", function(t) {
                 });
         });
         t.test("when there is an asynchronous error", function(t) {
-            const testModule = m({});
-            stub(testModule, 'getPort', nullFn);
-            stub(testModule, 'loadMiddlewares', rejectFn);
+            const testModule = m({}, {});
+            stub(testModule, "getPort", nullFn);
+            stub(testModule, "loadMiddlewares", rejectFn);
             return testModule
                 .startInstance()
                 .catch(() => t.pass("should return a rejected promise"))
@@ -141,9 +150,9 @@ t("Middleware loader", function(t) {
                 });
         });
         t.test("when given a valid app instance and a valid context", function(t) {
-            const testModule = m({});
-            stub(testModule, 'getPort', nullFn);
-            stub(testModule, 'loadMiddlewares', resolveFn);
+            const testModule = m({}, {});
+            stub(testModule, "getPort", nullFn);
+            stub(testModule, "loadMiddlewares", resolveFn);
             return testModule
                 .startInstance({
                     listen: (ignore, cb) => cb()

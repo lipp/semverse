@@ -1,3 +1,11 @@
+/**
+ * ### Entry point module
+ *
+ * This is where everything begins: We instanciate a new service and start it for
+ * everyone to see :3
+ *
+ * @module Main
+ */
 "use strict";
 
 const path = require("path");
@@ -5,13 +13,12 @@ const express = require("express");
 
 const BPromise = require("bluebird");
 
-const config = require(path.resolve(__dirname, "./config"));
-const utils = require(path.resolve(__dirname, "./lib/utils"));
-const middlewareLoader = require(path.resolve(__dirname, "./lib/middlewares"));
+const utils = require(path.resolve(__dirname, "lib/utils"));
+const config = require(path.resolve(__dirname, "config"));
+const middlewareLoader = require(path.resolve(__dirname, "lib/middlewares"));
 
 /**
- * @name instanciateService
- * @description Instanciate and start Service
+ * Instanciate and start Service
  * @param {Object} context - Current context
  * @return {Promise} Fulfilled when service is started
  **/
@@ -27,8 +34,7 @@ exports.instanciateService = function instanciateService(context) {
 };
 
 /**
- * @name main
- * @description The holy function that will start everything
+ * The holy function that will start everything
  * @return {Promise} Fulfilled when service is started
  **/
 exports.main = function main() {

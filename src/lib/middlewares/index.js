@@ -1,37 +1,36 @@
-'use strict';
+/**
+ * ### Middleware loader
+ *
+ * This module loads middlewares as they are set in the current configuration
+ *
+ * @module Middlewares/Loader
+ */
+"use strict";
 
-const lodash = require("lodash/fp");
+const {
+    curry,
+    flow,
+    get,
+    has,
+    map,
+    tap,
+    flattenDeep
+} = require("lodash/fp");
 const BPromise = require("bluebird");
 
 exports.factory = function factory(context) {
 
-    const utils = lodash.get('utils', context);
-    const config = lodash.get('config', context);
+    const utils = get("utils", context);
+    const config = get("config", context);
 
-    const curry = lodash.curry;
-    const flow = lodash.flow;
-    const get = lodash.get;
-    const map = lodash.map;
-    const tap = lodash.tap;
-
-    const requireFromProjectRoot = lodash.get('requireFromProjectRoot', utils);
-    const getLogger = lodash.get('getLogger', utils);
-
-    //const {
-    //utils,
-    //config
-    //} = context;
-    //const {
-    //curry, flow, get, map, tap,
-    //requireFromProjectRoot,
-    //getLogger
-    //} = utils;
+    const requireMiddleware = get("requireMiddleware", utils);
+    const getLogger = get("getLogger", utils);
 
     const log = getLogger(context);
 
     const instance = {};
 
-    /*
+    /**
      * @name registerMiddleware
      * @description Register a middleware
      * @curried
@@ -41,24 +40,29 @@ exports.factory = function factory(context) {
      */
     instance.registerMiddleware = curry((app, middleware) => app.use(middleware));
 
-    /*
+    /**
      * Initialize a middleware with the current context
-     * @param  {Function} middleware - Middlewre function
+     * @param  {Function} middleware - Middleware function
      * @return {Promise} Fulfilled on success
      */
     instance.initMiddleware = function initMiddleware(middleware) {
-        return middleware(context);
+        if (has("factory", middleware)) {
+            return middleware.factory(context);
+        }
+        return BPromise.reject(
+            new Error(`Middleware is missing a factory method: ${middleware}`)
+        );
     };
 
-    /*
+    /**
      * Config port getter. Default is 9100
      * @return {Number} Configured port
      */
     instance.getPort = function getPort() {
-        return get("port", config) || 9100;
+        return get("service.port", config) || 9100;
     };
 
-    /*
+    /**
      * Middleware loader
      * Pull all middleware names from config and register them in the app
      * @param  {Object} app - Service reference
@@ -70,29 +74,30 @@ exports.factory = function factory(context) {
         return BPromise
             .try(() => flow(
                 // Retrieve the middleware list from the config
-                get("middlewareList"),
+                get("service.middlewareList"),
                 // Handle empty middlewareList cases
                 (a) => a || [],
                 // Log it
                 tap((a) => log("debug", `Middleware list: ${JSON.stringify(a)}`)),
                 // Require everything
-                map(requireFromProjectRoot),
+                map(requireMiddleware),
                 // Call all middlewares factories to get middleware instances
                 map(instance.initMiddleware),
                 // Wait for all initializations to resolve
                 (middlewarePromises) => BPromise.all(middlewarePromises),
                 // Then register them in the service
                 (allresolved) => allresolved
+                .then(flattenDeep)
                 .then(map(instance.registerMiddleware(app)))
                 .then(() => log("info", `Successfully intitialized middlewares`))
                 .catch(function(error) {
-                    log("error", `Error while loading middlewares: ${error}`);
+                    log("error", `Error while loading middlewares: ${error.toString()}`);
                     return BPromise.reject(error);
                 })
             )(config));
     };
 
-    /*
+    /**
      * Service starter
      * Init all middlewares and make the app listen on config hostname/port
      * @param  {Object} app - Service reference
