@@ -4,13 +4,12 @@ const path = require("path");
 
 const {
     t,
-    prepareInstance,
+    prepareForTests,
     nullFn,
-    nullFnHO,
     throwFn
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareInstance(path.resolve(__dirname, "./entities"));
+const m = prepareForTests(__filename);
 
 t("Entities API Controller", function(t) {
 
@@ -18,21 +17,48 @@ t("Entities API Controller", function(t) {
         t.test("when there is an error", (t) =>
             m({
                 utils: {
-                    getLogger: nullFnHO,
-                    logAndReject: nullFn,
                     sendBack: throwFn
                 }
-            }).listEntities()
+            }, {}).listEntities()
             .catch(() => t.pass("should return a rejected promise"))
         );
         t.test("when there is no error", (t) =>
             m({
                 utils: {
-                    getLogger: nullFnHO,
-                    logAndReject: nullFn,
                     sendBack: nullFn
                 }
+            }, {
+                models: {
+                    entity: {
+                        getAll: nullFn
+                    }
+                }
             }).listEntities()
+            .then(() => t.pass("should return a fulfilled promise"))
+        );
+    });
+
+    t("createEntity()", function(t) {
+        t.test("when there is an error", (t) =>
+            m({
+                utils: {
+                    sendBack: throwFn
+                }
+            }, {}).createEntity()
+            .catch(() => t.pass("should return a rejected promise"))
+        );
+        t.test("when there is no error", (t) =>
+            m({
+                utils: {
+                    sendBack: nullFn
+                }
+            }, {
+                models: {
+                    entity: {
+                        create: nullFn
+                    }
+                }
+            }).createEntity()
             .then(() => t.pass("should return a fulfilled promise"))
         );
     });

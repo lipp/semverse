@@ -13,9 +13,9 @@ const express = require("express");
 
 const BPromise = require("bluebird");
 
-const config = require(path.resolve(__dirname, "./config"));
-const utils = require(path.resolve(__dirname, "./lib/utils"));
-const middlewareLoader = require(path.resolve(__dirname, "./lib/middlewares"));
+const utils = require(path.resolve(__dirname, "lib/utils"));
+const config = require(path.resolve(__dirname, "config"));
+const middlewareLoader = require(path.resolve(__dirname, "lib/middlewares"));
 
 /**
  * Instanciate and start Service

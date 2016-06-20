@@ -4,31 +4,31 @@ const path = require("path");
 
 const {
     t,
-    prepareStubs,
-    nullFn,
-    nullFnHO,
-    throwFn
+    prepareForTests,
+    nullFn
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareStubs(path.resolve(__dirname, "./swagger"));
+const m = prepareForTests(__filename);
 
 t("Swagger Middleware", function(t) {
 
     t("factory()", function(t) {
         t.test("when there is an error", (t) =>
-            m({
-                swaggerTools: {
-                    initializeMiddleware: throwFn
-                }
-            }).factory({
-                utils: {
-                    getLogger: nullFnHO
-                }
-            })
+            m({}, {})
             .catch(() => t.pass("should return a rejected promise"))
         );
         t.test("when there is no error", (t) =>
-            m({
+            m({}, {
+                controllers: {
+                    entities: {
+                        factory: function() {
+                            return {
+                                listEntities: null,
+                                createEntity: null
+                            };
+                        }
+                    }
+                },
                 swaggerTools: {
                     initializeMiddleware: (ignore, cb) => cb({
                         swaggerMetadata: nullFn,
@@ -36,11 +36,6 @@ t("Swagger Middleware", function(t) {
                         swaggerRouter: nullFn,
                         swaggerUi: nullFn
                     })
-                }
-            })
-            .factory({
-                utils: {
-                    getLogger: nullFnHO
                 }
             })
             .then((fn) => t.equal(

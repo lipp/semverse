@@ -8,7 +8,9 @@
  */
 "use strict";
 
-const lodash = require("lodash/fp");
+const {
+    get
+} = require("lodash/fp");
 const BPromise = require("bluebird");
 
 /**
@@ -19,7 +21,6 @@ const BPromise = require("bluebird");
  */
 exports.factory = (context) => BPromise
     .try(function() {
-        const get = lodash.get;
         const getLogger = get("utils.getLogger", context);
         const log = getLogger(context);
 

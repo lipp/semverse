@@ -4,10 +4,10 @@ const path = require("path");
 
 const {
     t,
-    prepareStubs
+    prepareForTests
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareStubs(path.resolve(__dirname, "./index"));
+const m = prepareForTests(__filename, null);
 
 t("Config loader", function(t) {
     //t("getService()", function(t) {

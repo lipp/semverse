@@ -3,15 +3,12 @@
 const path = require("path");
 
 const {
-    // Test harness
     t,
-    prepareStubs,
-
-    // Helpers
+    prepareForTests,
     nullFn
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareStubs(path.resolve(__dirname, "./test-helpers"));
+const m = prepareForTests(__filename, null);
 
 t("Test helpers library", function(t) {
 
@@ -84,6 +81,31 @@ t("Test helpers library", function(t) {
         t.test("when given any input", (t) =>
             m({}).resolveFnHO()()
             .then(() => t.pass("should return a function that returns a resolved Promise"))
+        );
+    });
+
+
+    t("rejectFn()", function(t) {
+        t.test("when given any input", (t) =>
+            m({}).rejectFn()
+            .catch(() => t.pass("should return a rejected Promise"))
+        );
+    });
+
+    t("rejectFnHO()", function(t) {
+        t.test("when its returned function is not given a rejection reason", (t) =>
+            m({}).rejectFnHO("foo")()
+            .catch((rejection) => t.equal(
+                rejection,
+                "foo",
+                "should return a function that returns the base reason"))
+        );
+        t.test("when its returned function is given a rejection reason", (t) =>
+            m({}).rejectFnHO("foo")("bar")
+            .catch((rejection) => t.equal(
+                rejection,
+                "bar",
+                "should return a function that returns its given reason"))
         );
     });
 

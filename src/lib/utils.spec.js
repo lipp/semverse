@@ -4,13 +4,14 @@ const path = require("path");
 
 const {
     t,
-    prepareStubs,
+    prepareForTests,
     nullFn,
     spy,
+    stub,
     createResponseMock
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareStubs(path.resolve(__dirname, "./utils"));
+const m = prepareForTests(__filename, null);
 
 t("Utils library", function(t) {
 
@@ -23,15 +24,31 @@ t("Utils library", function(t) {
         });
     });
 
-    t("requireMiddleware()", function(t) {
-        t.test("when given a middleware name", function(t) {
-            t.doesNotThrow(
+    t("getModulePath()", function(t) {
+        t.test("when given a relative path", function(t) {
+            t.equal(
                 m({
                     path: {
-                        resolve: nullFn,
-                        join: () => path.resolve("src/lib/test-helpers")
+                        resolve: () => "/foo/bar"
                     }
-                }).requireMiddleware,
+                }).getModulePath("baz"),
+                "/foo/bar/baz",
+                "should return an absolute path");
+            t.end();
+        });
+    });
+
+    t("requireMiddleware()", function(t) {
+        t.test("when given a middleware name", function(t) {
+            const testedModule = m({
+                path: {
+                    resolve: nullFn,
+                    join: () => path.resolve("src/lib/test-helpers")
+                }
+            });
+            stub(testedModule, "getModulePath", (a) => a);
+            t.doesNotThrow(
+                testedModule.requireMiddleware,
                 "should not throw");
             t.end();
         });

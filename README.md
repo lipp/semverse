@@ -23,9 +23,11 @@ I also wanted to improve my nodejs skills by using some of its most useful
 modules, like Swagger, Sequelize and Tape.
 
 ## Why "SemVerse"
-Because I intend to follow the best practice of all, and since world building will be as incremental as possible, it made sense.
+
+Because I intend to follow the best practice of all best practices, and since world building will be as incremental as possible, it made sense.
 
 ## How to get started
+
 Well you can either try my very own instance, or deploy on your heroku account:
 
 [![Deploy in your Heroku now !](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
@@ -35,6 +37,7 @@ If, as am I, you are more willing to do everything by yourself, you can just clo
 See also the [GitHub Page](http://stephanetrebel.github.io/semverse) (Very very WIP)
 
 ## How to use
+
 After starting/deploying the app go with your favorite browser to `/docs` and
 you should see the Swagger UI with the basic controllers.
 

@@ -39,6 +39,30 @@
     }],
     "paths": {
         "/entity": {
+            "x-swagger-router-controller": "entities",
+            "get": {
+                "tags": [
+                    "entity"
+                ],
+                "summary": "List all entities",
+                "description": "This action will list all entities",
+                "operationId": "listEntities",
+                "responses": {
+                    "200": {
+                        "description": "Entity list",
+                        "schema": {
+                            "$ref": "#/definitions/EntityList"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                },
+                "security": [{}]
+            },
             "post": {
                 "tags": [
                     "entity"
@@ -58,35 +82,6 @@
                 "responses": {
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
-                        }
-                    }
-                },
-                "security": [{}]
-            },
-            "put": {
-                "tags": [
-                    "entity"
-                ],
-                "summary": "Update an existing entity",
-                "description": "",
-                "operationId": "updateEntity",
-                "parameters": [{
-                    "in": "body",
-                    "name": "body",
-                    "description": "Entity object that needs to be updated",
-                    "required": true,
-                    "schema": {
-                        "$ref": "#/definitions/Entity"
-                    }
-                }],
-                "responses": {
-                    "404": {
-                        "description": "Entity not found"
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -156,6 +151,42 @@
                 "responses": {
                     "400": {
                         "description": "Invalid entity value",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                },
+                "security": [{}]
+            },
+            "put": {
+                "tags": [
+                    "entity"
+                ],
+                "summary": "Update an existing entity",
+                "description": "",
+                "operationId": "updateEntity",
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "description": "Entity object that needs to be updated",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/Entity"
+                    }
+                }, {
+                    "in": "path",
+                    "name": "entityId",
+                    "description": "Entity id to delete",
+                    "required": true,
+                    "type": "integer",
+                    "format": "int64"
+                }],
+                "responses": {
+                    "404": {
+                        "description": "Entity not found"
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -400,9 +431,6 @@
             }
         },
         "Entity": {
-            "required": [
-                "id"
-            ],
             "properties": {
                 "id": {
                     "type": "integer",
@@ -412,6 +440,12 @@
                     "type": "string",
                     "example": "doggie"
                 }
+            }
+        },
+        "EntityList": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Entity"
             }
         }
     }

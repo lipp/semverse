@@ -7,9 +7,10 @@
  */
 "use strict";
 
-const lodash = require("lodash/fp");
+const {
+    get
+} = require("lodash/fp");
 const BPromise = require("bluebird");
-//const models = require("models");
 
 /**
  * Initialize Entities controller instance
@@ -18,11 +19,14 @@ const BPromise = require("bluebird");
  */
 exports.factory = function factory(context) {
 
-    const get = lodash.get;
     const log = get("utils.getLogger", context)(context);
     const sendBack = get("utils.sendBack", context);
     const logAndReject = get("utils.logAndReject", context)(log);
-
+    const getModulePath = get("utils.getModulePath", context);
+    //const path = require("path");
+    //const entity = require(path.join(path.resolve(__dirname, "../../"), "models")).entity;
+    const models = require(getModulePath("models"));
+    const entity = get("entity", models);
     const instance = {};
 
     /**
@@ -31,15 +35,11 @@ exports.factory = function factory(context) {
      * @param {Object} res - Response reference
      * @return {Promise<Object>} Entities list
      */
-    instance.listEntities = function listEntities(req, res) {
+    instance.listEntities = function listEntities(ignore, res) {
         return BPromise
-            .try(() => lodash.get("params.order", req))
             // Placeholder for database management
-            //.then(models.entity.create)
-            .then(() => ({
-                foo: 'bar'
-            }))
-            .then((entity) => sendBack(res, 200, entity))
+            .try(() => entity.getAll())
+            .then((entities) => sendBack(res, 200, entities))
             .catch((error) => logAndReject(
                 `An error happend during listEntities: ${error}`,
                 error));
@@ -51,14 +51,15 @@ exports.factory = function factory(context) {
      * @param {Object} res - Response reference
      * @return {Promise<Object>} New entity
      */
-    //instance.createEntity = function createEntity(req, res) {
-    //return BPromise
-    //.try(() => lodash.get("body", req))
-    //.then(models.entity.create)
-    //.then(sendBack(res, 201))
-    //.catch((error) => logAndReject(
-    //`An error happend during createEntity: ${error}`,
-    //error));
-    //}
+    instance.createEntity = function createEntity(req, res) {
+        return BPromise
+            .try(() => get("body", req))
+            .then((body) => entity.create(body))
+            .then((result) => sendBack(res, 201, result))
+            .catch((error) => logAndReject(
+                `An error happend during createEntity: ${error}`,
+                error));
+    };
+
     return instance;
 };

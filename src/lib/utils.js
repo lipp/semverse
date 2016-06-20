@@ -9,7 +9,9 @@
 "use strict";
 
 const path = require("path");
-const lodash = require("lodash/fp");
+const {
+    curry
+} = require("lodash/fp");
 const BPromise = require("bluebird");
 
 const {
@@ -20,13 +22,22 @@ const {
 exports.getLogger = () => console.log;
 
 /**
- * Require a middleware, e.g. a module located in /lib/middlewares
+ * Compute a module absolute path from its root based path
+ * @param {String} relativePath - Module relative path from project root
+ * @return {String} Module absolute path
+ */
+exports.getModulePath = function getModulePath(relativePath) {
+    const projectRoot = path.resolve(__dirname, "../");
+    return path.join(projectRoot, relativePath);
+};
+
+/**
+ * Require a middleware, e.g. a module located in <project_root>/lib/middlewares
  * @param {String} moduleName - Module name
  * @return {Mixed} Module exports
  */
 exports.requireMiddleware = function requireMiddleware(moduleName) {
-    const projectRoot = path.resolve(__dirname, "../lib/middlewares");
-    return require(path.join(projectRoot, moduleName));
+    return require(exports.getModulePath(path.join("lib/middlewares", moduleName)));
 };
 
 /**
@@ -38,7 +49,7 @@ exports.requireMiddleware = function requireMiddleware(moduleName) {
  * @param {Object} content - Content to be sent back
  * @return {Undefined} Nothing
  */
-exports.sendBack = lodash.curry(function sendBack(res, status, content) {
+exports.sendBack = curry(function sendBack(res, status, content) {
     if (isFunction(get("status", res)) && isFunction(get("json", res))) {
         res
             .status(status)
@@ -55,7 +66,7 @@ exports.sendBack = lodash.curry(function sendBack(res, status, content) {
  * @param {Object} error - Error object
  * @return {Promise<Error>} Same error object
  */
-exports.logAndReject = lodash.curry(function logAndReject(logFn, message, error) {
+exports.logAndReject = curry(function logAndReject(logFn, message, error) {
     logFn(message);
     return BPromise.reject(error);
 });
