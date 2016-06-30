@@ -3,9 +3,10 @@
 const path = require("path");
 
 const {
-    t,
+    executeTests,
     prepareForTests,
     nullFn,
+    resolveFn,
     spy,
     stub,
     createResponseMock
@@ -13,33 +14,37 @@ const {
 
 const m = prepareForTests(__filename, null);
 
-t("Utils library", function(t) {
-
-    t("getLogger()", function(t) {
-        t.test("since it's not implemented yet", function(t) {
+executeTests("Utils library", [{
+    name: "getLogger()",
+    assertions: [{
+        when: "since it's not implemented yet",
+        should: "just not throw for the moment",
+        test: (test) => test((t) => resolveFn(
             t.doesNotThrow(
-                m({}).getLogger,
-                "should just not throw for the moment");
-            t.end();
-        });
-    });
-
-    t("getModulePath()", function(t) {
-        t.test("when given a relative path", function(t) {
+                m({}).getLogger)
+        ))
+    }]
+}, {
+    name: "getModulePath()",
+    assertions: [{
+        when: "given a relative path",
+        should: "return an absolute path",
+        test: (test) => test((t) => resolveFn(
             t.equal(
                 m({
                     path: {
                         resolve: () => "/foo/bar"
                     }
                 }).getModulePath("baz"),
-                "/foo/bar/baz",
-                "should return an absolute path");
-            t.end();
-        });
-    });
-
-    t("requireMiddleware()", function(t) {
-        t.test("when given a middleware name", function(t) {
+                "/foo/bar/baz")
+        ))
+    }]
+}, {
+    name: "requireMiddleware()",
+    assertions: [{
+        when: "given a middleware name",
+        should: "not throw",
+        test: (test) => test(function(t) {
             const testedModule = m({
                 path: {
                     resolve: nullFn,
@@ -48,44 +53,85 @@ t("Utils library", function(t) {
             });
             stub(testedModule, "getModulePath", (a) => a);
             t.doesNotThrow(
-                testedModule.requireMiddleware,
-                "should not throw");
+                testedModule.requireMiddleware);
             t.end();
-        });
-    });
-
-    t("sendBack()", function(t) {
-        t.test("when given an invalid response reference", function(t) {
+        })
+    }]
+}, {
+    name: "requireModel()",
+    assertions: [{
+        when: "given a model name",
+        should: "not throw",
+        test: (test) => test(function(t) {
+            const testedModule = m({
+                path: {
+                    resolve: nullFn,
+                    join: () => path.resolve("src/lib/test-helpers")
+                }
+            });
+            stub(testedModule, "getModulePath", (a) => a);
+            t.doesNotThrow(
+                testedModule.requireModel);
+            t.end();
+        })
+    }]
+}, {
+    name: "sendBack()",
+    assertions: [{
+        when: "given an invalid response reference",
+        should: "not throw",
+        test: (test) => test((t) => resolveFn(
             t.doesNotThrow(() =>
-                m({}).sendBack(null, null, null),
-                "should not throw");
-            t.end();
-        });
-        t.test("when given a valid response reference", function(t) {
+                m({}).sendBack(null, null, null))
+        ))
+    }, {
+        when: "given a valid response reference",
+        should: "call both status and json response methods",
+        test: (test) => test(function(t) {
             const res = createResponseMock();
             const statusSpy = spy(res, "status");
             const jsonSpy = spy(res, "json");
             m({}).sendBack(res, null, null);
             t.equal(
                 statusSpy.called && jsonSpy.called,
-                true,
-                "should call both status and json response methods");
+                true);
             t.end();
-        });
-    });
-
-    t("logAndReject()", function(t) {
-        t.test("when not given a log function", function(t) {
+        })
+    }]
+}, {
+    name: "logAndResolve()",
+    assertions: [{
+        when: "not given a log function",
+        should: "throw",
+        test: (test) => test((t) => resolveFn(
             t.throws(() =>
-                m({}).logAndReject(null, null, null),
-                "should throw");
-            t.end();
-        });
-        t.test("when given a log function", (t) =>
+                m({}).logAndResolve(null, null, null, null))
+        ))
+    }, {
+        when: "given a log function",
+        should: "return a resolved promise",
+        test: (test) => test((t) =>
             m({})
-            .logAndReject(nullFn, null, null)
-            .catch(() => t.pass("should return a rejected promise"))
-        );
-    });
-
-});
+            .logAndResolve(nullFn, null, null, null)
+            .then(() => t.pass(""))
+        )
+    }]
+},{
+    name: "logAndReject()",
+    assertions: [{
+        when: "not given a log function",
+        should: "throw",
+        test: (test) => test((t) => resolveFn(
+            t.throws(() =>
+                m({}).logAndReject(null, null, null, null))
+        ))
+    }, {
+        when: "given a log function",
+        should: "return a rejected promise",
+        test: (test) => test((t) =>
+            m({})
+            .logAndReject(nullFn, null, null, null)
+            .catch(() => t.pass(""))
+        )
+    }]
+}]);

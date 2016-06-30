@@ -20,13 +20,11 @@ const BPromise = require("bluebird");
 
 exports.factory = function factory(context) {
 
-    const utils = get("utils", context);
-    const config = get("config", context);
+    const utils = context.utils;
 
-    const requireMiddleware = get("requireMiddleware", utils);
-    const getLogger = get("getLogger", utils);
-
-    const log = getLogger(context);
+    const log = utils.getLogger(context);
+    const logAndResolve = utils.logAndResolve(log);
+    const logAndReject = utils.logAndReject(log);
 
     const instance = {};
 
@@ -34,11 +32,11 @@ exports.factory = function factory(context) {
      * @name registerMiddleware
      * @description Register a middleware
      * @curried
-     * @param  {Object} app - App reference
+     * @param  {Object} service - service reference
      * @param  {Function} middleware - Middleware function
      * @return {Boolean} True on success
      */
-    instance.registerMiddleware = curry((app, middleware) => app.use(middleware));
+    instance.registerMiddleware = curry((service, middleware) => service.use(middleware));
 
     /**
      * Initialize a middleware with the current context
@@ -55,22 +53,16 @@ exports.factory = function factory(context) {
     };
 
     /**
-     * Config port getter. Default is 9100
-     * @return {Number} Configured port
-     */
-    instance.getPort = function getPort() {
-        return get("service.port", config) || 9100;
-    };
-
-    /**
      * Middleware loader
-     * Pull all middleware names from config and register them in the app
-     * @param  {Object} app - Service reference
+     * Pull all middleware names from config and register them in the service
+     * @param  {Object} service - Service reference
      * @return {Promise} Fulfilled when all middlewares are initialized
      */
-    instance.loadMiddlewares = function loadMiddlewares(app) {
+    instance.loadMiddlewares = function loadMiddlewares() {
+        const config = context.config;
+        const requireMiddleware = context.utils.requireMiddleware;
         log("debug", `Config is ${JSON.stringify(config)}`);
-        log("info", `Loading middlewares...`);
+        log("info", "Loading middlewares...");
         return BPromise
             .try(() => flow(
                 // Retrieve the middleware list from the config
@@ -88,39 +80,10 @@ exports.factory = function factory(context) {
                 // Then register them in the service
                 (allresolved) => allresolved
                 .then(flattenDeep)
-                .then(map(instance.registerMiddleware(app)))
-                .then(() => log("info", `Successfully intitialized middlewares`))
-                .catch(function(error) {
-                    log("error", `Error while loading middlewares: ${error.toString()}`);
-                    return BPromise.reject(error);
-                })
+                .then(map(instance.registerMiddleware(context.service)))
+                .then(() => logAndResolve("info", "Successfully intitialized middlewares", context))
+                .catch(logAndReject("error", "Error while loading middlewares"))
             )(config));
-    };
-
-    /**
-     * Service starter
-     * Init all middlewares and make the app listen on config hostname/port
-     * @param  {Object} app - Service reference
-     * @return {Promise} Fulfilled when instance is successfully started
-     */
-    instance.startInstance = function startInstance(app) {
-        return BPromise
-            .try(function() {
-                const port = instance.getPort();
-                log("info", `Starting service instance on port ${port}...`);
-                return instance.loadMiddlewares(app)
-                    .then(() => app.listen(
-                        port, () => log("info",
-                            `Service instance successfully started`
-                        )
-                    ))
-                    .catch(function(error) {
-                        log("critical",
-                            `Fatal error while starting the service instance: ${error}`
-                        );
-                        return BPromise.reject(error);
-                    });
-            });
     };
 
     return instance;

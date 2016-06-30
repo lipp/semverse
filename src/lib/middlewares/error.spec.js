@@ -3,7 +3,7 @@
 const path = require("path");
 
 const {
-    t,
+    executeTests,
     prepareForTests,
     nullFn,
     nullFnHO,
@@ -12,18 +12,23 @@ const {
 
 const m = prepareForTests(__filename);
 
-t("Error Middleware", function(t) {
-
-    t("factory()", function(t) {
-        t.test("when there is an error", (t) =>
+executeTests("Error Middleware", [{
+    name: "factory()",
+    assertions: [{
+        when: "there is an error",
+        should: "return a rejected promise",
+        test: (test) => test((t) =>
             m({
                 utils: {
                     getLogger: throwFnHO
                 }
             }, {})
-            .catch(() => t.pass("should return a rejected promise"))
-        );
-        t.test("when there is no error", (t) =>
+            .catch(() => t.pass(""))
+        )
+    }, {
+        when: "there is no error",
+        should: "return a promise fulfilled with an Express Error Middleware",
+        test: (test) => test((t) =>
             m({
                 utils: {
                     getLogger: nullFnHO,
@@ -31,8 +36,7 @@ t("Error Middleware", function(t) {
                 }
             }, {})
             .then((fn) => fn("foo", null, null, (a) => t.equal(a, "foo",
-                "should return a promise fulfilled with an Express Error Middleware")))
-        );
-    });
-
-});
+                "")))
+        )
+    }]
+}]);

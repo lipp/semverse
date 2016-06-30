@@ -3,19 +3,22 @@
 const path = require("path");
 
 const {
-    t,
-    prepareForTests
+    executeTests,
+    prepareForTests,
+    resolveFn
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareForTests(__filename, null);
 
-t("Config loader", function(t) {
-    //t("getService()", function(t) {
-    t.test("since it's not entirely implemented yet", function(t) {
-        t.equal(
-            typeof m({}), "object",
-            "should be defined as an object");
-        t.end();
-    });
-    //});
-});
+executeTests("Config loader", [{
+    name: "listEntities()",
+    assertions: [{
+        when: "...since it's not entirely implemented yet",
+        should: "be defined as an object",
+        test: (test) => test((t) => resolveFn(
+            t.equal(
+                typeof m({}),
+                "object")
+        ))
+    }]
+}]);

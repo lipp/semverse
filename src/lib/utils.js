@@ -41,6 +41,15 @@ exports.requireMiddleware = function requireMiddleware(moduleName) {
 };
 
 /**
+ * Require a model, e.g. a module located in <project_root>/models
+ * @param {String} moduleName - Module name
+ * @return {Mixed} Module exports
+ */
+exports.requireModel = function requireModel(moduleName) {
+    return require(exports.getModulePath(path.join("models", moduleName)));
+};
+
+/**
  * @name sendBack
  * @description Mutate response
  * @curried
@@ -58,15 +67,31 @@ exports.sendBack = curry(function sendBack(res, status, content) {
 });
 
 /**
+ * @name logAndResolve
+ * @description Log an error and resolve it again
+ * @curried
+ * @param {String} logFn - Log function
+ * @param {String} level - Log level
+ * @param {String} message - Message that will be logged
+ * @param {Mixed} value - Value to be resolved with
+ * @return {Promise<Mixed>} Same value
+ */
+exports.logAndResolve = curry(function logAndResolve(logFn, level, message, value) {
+    logFn(level, message);
+    return BPromise.resolve(value);
+});
+
+/**
  * @name logAndReject
  * @description Log an error and reject it again
  * @curried
  * @param {String} logFn - Log function
+ * @param {String} level - Log level
  * @param {String} message - Message that will be logged
  * @param {Object} error - Error object
  * @return {Promise<Error>} Same error object
  */
-exports.logAndReject = curry(function logAndReject(logFn, message, error) {
-    logFn(message);
+exports.logAndReject = curry(function logAndReject(logFn, level, message, error) {
+    logFn(level, message);
     return BPromise.reject(error);
 });

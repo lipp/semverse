@@ -17,10 +17,10 @@ const lodash = require("lodash/fp");
 const {
     merge,
     map,
-    curry,
     isFunction,
     keys,
-    flow
+    flow,
+    curry
 } = lodash;
 
 const BPromise = require("bluebird");
@@ -30,49 +30,35 @@ const sinon = require("sinon");
 const proxyquire = require("proxyquire").noPreserveCache().noCallThru();
 
 /**
- * @name unitTest
- * @function
- * @description Returns a curried function that will execute a test with
- * a description pre fed by the parent test block
- * @curried
+ * Return a function that will execute a test with a given description
  * @private
  * @param {Function} testFn - Test engine
- * @param {String} blockDescription - Parent block description
- * @param {String} testDescription - This Test description
+ * @param {String} testDescription - Unit test description
  * @param {Function} cb - Callback called with test engine object
- * @return {Function} Atomic test handler
+ * @return {Function} Unit test handler
  */
-exports.unitTest = curry(
-    function unitTest(testFn, blockDescription, testDescription, cb) {
-        return testFn(`${blockDescription} : ${testDescription}`, cb);
-    });
+exports.unitTest = (testFn, testDescription) => (cb) =>
+    testFn(`${testDescription}`, cb);
 
 /**
- * Returns a function that will execute several tests with a concatenated
- * description
- *
+ * Returns a function that will perform several tests, each with a concatenated
+ * description.
+ * Descriptions will be concatenated to form a test statement that will have this
+ * structure: "Module - Function(): When XXXXXXXXX, it should YYYYYYYYY
  * @public
- * @param {String} parentBlockDescription - Parent block description
- * @param {String} [blockDescription] - This test block description
- * @param {Function} cb - Callback
- * @return {Function} Test block handler
+ * @param {String} moduleName - Tested module description
+ * @param {Array<Object>} assertions - Assertion array to perform
+ * @return {Array} Assertions execution results
  */
-exports.t = function t(parentBlockDescription, blockDescription, cb) {
-    let cb2;
-    let msg;
-    if (isFunction(blockDescription)) {
-        cb2 = blockDescription;
-        msg = parentBlockDescription;
-    } else {
-        cb2 = cb;
-        msg = `${parentBlockDescription} - ${blockDescription}`;
-    }
-    const newTestBlock = (b, c) => exports.t(msg, b, c);
-    newTestBlock.test = exports.unitTest(tape, msg);
-    newTestBlock.skip = exports.unitTest(tape.skip, msg);
-    newTestBlock.only = exports.unitTest(tape.only, msg);
-    return cb2(newTestBlock);
-};
+exports.executeTests = (moduleName, functionBlocks) =>
+    map((fn) =>
+        map(function(assert) {
+            const description = `${moduleName} - ${fn.name}: when ${assert.when}, it should ${assert.should}`;
+            const newTest = exports.unitTest(tape, description);
+            newTest.skip = exports.unitTest(tape.skip, description);
+            newTest.only = exports.unitTest(tape.only, description);
+            return assert.test(newTest);
+        }, fn.assertions), functionBlocks);
 
 /**
  * Identity function
@@ -81,9 +67,7 @@ exports.t = function t(parentBlockDescription, blockDescription, cb) {
  * @param {Mixed} input - Value to be returned
  * @return {Mixed} Same as input
  */
-exports.idFn = function idFn(input) {
-    return input;
-};
+exports.idFn = (input) => input;
 
 /**
  * Returns null
@@ -91,9 +75,7 @@ exports.idFn = function idFn(input) {
  * @public
  * @return {Null} Null
  */
-exports.nullFn = function nullFn() {
-    return null;
-};
+exports.nullFn = () => null;
 
 /**
  * Returns a function that returns null
@@ -101,31 +83,27 @@ exports.nullFn = function nullFn() {
  * @public
  * @return {Function} Function that returns null
  */
-exports.nullFnHO = function nullFnHO() {
-    return () => exports.nullFn();
-};
+exports.nullFnHO = () => exports.nullFn;
 
 /**
  * Throws an Error
  *
  * @public
- * @param {String} error - Error message
+ * @param {String} message - Error message
  * @return {Error} Error thrown
  */
-exports.throwFn = function throwFn(error) {
-    throw new Error(error);
+exports.throwFn = function throwFn(message) {
+    throw new Error(message);
 };
 
 /**
  * Returns a function that throws an Error
  *
  * @public
- * @param {String} error - Error message
+ * @param {String} message - Error message
  * @return {Function} Function that throws an error
  */
-exports.throwFnHO = function throwFnHO(error) {
-    return () => exports.throwFn(error);
-};
+exports.throwFnHO = (message) => () => exports.throwFn(message);
 
 /**
  * Returns a resolved Promise
@@ -134,9 +112,7 @@ exports.throwFnHO = function throwFnHO(error) {
  * @param {String} value - Resolved value
  * @return {Promise<Mixed>} Promise resoved with given value
  */
-exports.resolveFn = function resolveFn(value) {
-    return BPromise.resolve(value);
-};
+exports.resolveFn = (value) => BPromise.resolve(value);
 
 /**
  * Returns a function that return a resolved Promise with given value
@@ -145,9 +121,7 @@ exports.resolveFn = function resolveFn(value) {
  * @param  {String} value - Resolved value
  * @return {Function} Function that returns a resolved Promise with given value
  */
-exports.resolveFnHO = function resolveFnHO(value) {
-    return () => exports.resolveFn(value);
-};
+exports.resolveFnHO = (value) => () => exports.resolveFn(value);
 
 /**
  * Returns a rejected Promise
@@ -156,9 +130,7 @@ exports.resolveFnHO = function resolveFnHO(value) {
  * @param  {String} reason - Rejection reason
  * @return {Promise<Mixed>} Promise rejected with given reason
  */
-exports.rejectFn = function rejectFn(reason) {
-    return BPromise.reject(reason);
-};
+exports.rejectFn = (reason) => BPromise.reject(new Error(reason));
 
 /*
  * Returns a function that return a rejected Promise with given reason
@@ -167,21 +139,18 @@ exports.rejectFn = function rejectFn(reason) {
  * @param  {String} reason - Rejection reason
  * @return {Function} Function that return a rejected Promise with given reason
  */
-exports.rejectFnHO = function rejectFnHO(reason) {
-    return function(otherReason) {
-        if (otherReason) {
-            return exports.rejectFn(otherReason);
-        }
-        return exports.rejectFn(reason);
-    };
-};
+exports.rejectFnHO = (reason) => (otherReason) =>
+    (otherReason) ? exports.rejectFn(otherReason) : exports.rejectFn(reason);
 
-// Module names, based on project root, to ensure consistency across tests
+// Stubbable Module, based on project root if project related, to ensure consistency across tests
+// Node modules can also go here if they can be stubbed
+exports.bluebird = "bluebird";
 exports.swaggerTools = "swagger-tools";
 exports.config = path.resolve(__dirname, "../config");
 exports.utils = path.resolve(__dirname, "../lib/utils");
 exports.middlewareLoader = path.resolve(__dirname, "../lib/middlewares");
-exports.models = path.resolve(__dirname, "../models");
+exports.modelLoader = path.resolve(__dirname, "../models");
+exports.entity = path.resolve(__dirname, "../models/entity");
 exports.controllers = path.resolve(__dirname, "../api/controllers");
 
 // Default stubs that will be used across tests
@@ -190,22 +159,25 @@ const noCallThru = {
     "@noCallThru": true
 };
 const defaultStubs = {
-    // External dependencies
+    // Dependencies which have a default stub (that can be overriden)
+    bluebird: BPromise,
     path: path,
     lodash: lodash,
-    tape: noCallThru,
-    proxyquire: proxyquire,
-    express: noCallThru
+    proxyquire: proxyquire
 };
-// Internal dependencies
+// Dependencies that have to be stubbed (no default)
 map(function(dep) {
     defaultStubs[dep] = noCallThru;
 }, [
+    "fs",
+    "tape",
+    "express",
     exports.swaggerTools,
     exports.config,
     exports.utils,
     exports.middlewareLoader,
-    exports.models,
+    exports.modelLoader,
+    exports.entity,
     exports.controllers
 ]);
 
@@ -215,7 +187,8 @@ const defaultContext = {
     utils: {
         getLogger: exports.nullFnHO,
         getModulePath: require(exports.utils).getModulePath,
-        logAndReject: exports.rejectFnHO
+        logAndResolve: () => exports.resolveFnHO,
+        logAndReject: () => exports.rejectFnHO
     }
 };
 
@@ -232,7 +205,7 @@ const defaultContext = {
  * @param  {Object} object - Input object
  * @return {Object} Converted object
  */
-exports.convertIntoComputedProperties = function convertIntoComputedProperties(object) {
+exports.convertIntoComputedProperties = function(object) {
     const newObj = {};
     const objKeys = keys(object);
     map(function(property) {
@@ -256,12 +229,13 @@ exports.convertIntoComputedProperties = function convertIntoComputedProperties(o
  * @param {Object} customStubs - Custom stubs for the proxified module
  * @return {Mixed} Proxified module
  */
-exports.requireWithStubs = function requireWithStubs(moduleName, customStubs) {
-    return proxyquire(moduleName, flow(
+exports.requireWithStubs = (moduleName, customStubs) => proxyquire(
+    moduleName,
+    flow(
         merge(exports.convertIntoComputedProperties(customStubs)),
         merge(defaultStubs)
-    )({}));
-};
+    )({})
+);
 
 /**
  * Create a new instance from a given module factory with a given context that
@@ -272,12 +246,12 @@ exports.requireWithStubs = function requireWithStubs(moduleName, customStubs) {
  * @param {Object} customContext - Custom context for the module factory
  * @return {Mixed} New instance
  */
-exports.createInstance = function createInstance(module, customContext) {
-    return module.factory(flow(
+exports.createInstance = (module, customContext) => module.factory(
+    flow(
         merge(customContext),
         merge(defaultContext)
-    )({}));
-};
+    )({})
+);
 
 /**
  * @name prepareForTests
@@ -295,15 +269,14 @@ exports.createInstance = function createInstance(module, customContext) {
  * @return {Mixed} Proxified module, or proxified module instance, if the
  * module has a factory
  */
-exports.prepareForTests = curry(
-    function prepareForTests(testFileName, customContext, customStubs) {
-        const moduleName = testFileName.replace(".spec", "");
-        const module = exports.requireWithStubs(moduleName, customStubs);
-        if (isFunction(module.factory)) {
-            return exports.createInstance(module, customContext);
-        }
-        return module;
-    });
+exports.prepareForTests = curry(function(testFileName, customContext, customStubs) {
+    const moduleName = testFileName.replace(".spec", "");
+    const module = exports.requireWithStubs(moduleName, customStubs);
+    if (isFunction(module.factory)) {
+        return exports.createInstance(module, customContext);
+    }
+    return module;
+});
 
 // Abstract Sinon.js in tests
 exports.stub = sinon.stub;
@@ -315,7 +288,7 @@ exports.spy = sinon.spy;
  * @public
  * @return {Object} Response mock
  */
-exports.createResponseMock = function createResponseMock() {
+exports.createResponseMock = function() {
     const response = {};
     response.status = function(status) {
         response.status = status;
