@@ -23,7 +23,11 @@ executeTests("Swagger Middleware", [{
         when: "there is no error",
         should: "return a promise fulfilled with an object",
         test: (test) => test((t) =>
-            m({}, {
+            m({
+                config: {
+                    swagger: null
+                }
+            }, {
                 controllers: {
                     entities: {
                         factory: function() {

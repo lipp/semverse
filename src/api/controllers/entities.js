@@ -1,7 +1,7 @@
 /**
  * ### Entities controller
  *
- * This controller is in charge of handling all publicly exposed entites logic
+ * This controller is in charge of handling all publicly exposed entites logic.
  *
  * @module API/Controllers/Entities
  */
@@ -33,7 +33,6 @@ exports.factory = function(context) {
      * @return {Promise<Object>} Entities list
      */
     instance.listEntities = (ignore, res) => BPromise
-        // Placeholder for database management
         .try(() => entity.getAll())
         .then((entities) => sendBack(res, 200, entities))
         .catch(logAndReject("error", "An error happend during listEntities"));

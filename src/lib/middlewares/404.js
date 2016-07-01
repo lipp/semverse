@@ -1,8 +1,9 @@
 /**
  * ### 404 Middleware
  *
- * This middleware send back a 404 response status for each request.
- * It has to be loaded after all other meaningful middlewares.
+ * This middleware sends back a 404 response status for every request.
+ * It has to be loaded after all other routing middleware to serve as a default
+ * route.
  *
  * @module Middlewares/404
  */
@@ -14,17 +15,15 @@ const {
 const BPromise = require("bluebird");
 
 /**
- * Initialize PageNotFound middleware
- * This is a simple middleware that will answer any request with a 404 error
+ * Instanciate PageNotFound middleware
+ * This simple middleware will answer to any request with a 404 error
  * @param  {Object} context - Current context
  * @return {Promise<Function>} PageNotFound middleware function
  */
 exports.factory = (context) => BPromise
     .try(function() {
-        const getLogger = get("utils.getLogger", context);
-        const log = getLogger(context);
-
-        const sendBack = get("utils.sendBack", context);
+        const log = context.utils.getLogger(context);
+        const sendBack = context.utils.sendBack;
 
         log("info", "Adding PageNotFound handler");
 

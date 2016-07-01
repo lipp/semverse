@@ -2,16 +2,21 @@
  * ### Entity model
  *
  * This module describes an Entity model
+ * For the moment it's just a placeholder, though
  *
  * @module Models/Entity
  */
 "use strict";
 
+/**
+ * Instanciate Entities model
+ * @return {Object} Entites model instance
+ */
 exports.factory = function factory( /*sequelize*/ ) {
 
     const instance = {};
 
-    // Exported model name for model grouping
+    // Exported model name
     instance.name = 'entity';
 
     // Entities list
@@ -19,7 +24,7 @@ exports.factory = function factory( /*sequelize*/ ) {
 
     /**
      * Create a new entity
-     * @return {String} New entity
+     * @return {Object} New entity
      */
     instance.create = function create() {
         const newEntity = {
@@ -32,29 +37,21 @@ exports.factory = function factory( /*sequelize*/ ) {
 
     /**
      * Delete an entity
-     * @return {String} Deleted entity
+     * @return {Object} Deleted entity
      */
-    instance.remove = function remove() {
-        const entity = entities.pop();
-        return entity;
-    };
+    instance.remove = () => entities.pop();
 
     /**
      * Retrieve an entity
-     * @return {String} Retrieved entity
+     * @return {Object} Retrieved entity
      */
-    instance.get = function get() {
-        const entity = entities[0];
-        return entity;
-    };
+    instance.get = () => entities[0];
 
     /**
      * Retrieve all entities
-     * @return {Array} Entity list
+     * @return {Array<Object>} Entity list
      */
-    instance.getAll = function getAll() {
-        return entities;
-    };
+    instance.getAll = () => entities;
 
     return instance;
 };
