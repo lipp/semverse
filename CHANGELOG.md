@@ -1,8 +1,8 @@
-[5.0.0 - UNRELEASED]
+[5.0.0]
 ### The Refactor update
 
 Things are moving on quite well and all the pieces are slowing coming in place: Swagger is functional, Sequelize will be soon, Still at 100% coverage and with a framework that will allow me to write good BDD Integration Tests.
-Next step is most likely Sequelize, but maybe also a working Herokyu deploy process, because for the moment it just crashes.
+Next step is most likely Sequelize, but maybe also a working Heroku deploy process, because for the moment it just crashes.
 
 Anyway, changes this time are:
 - [REFACTOR]: The whole test framework has been overhauled. I ditched my old one because it was not code-folding friendly, and I wanted to force myself to write structured, self-documented tests, with a when/should syntax. Plus its more FP oriented and that is always a good thing to do
