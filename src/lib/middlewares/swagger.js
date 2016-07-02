@@ -1,13 +1,22 @@
 /**
  * ### Swagger Middleware
  *
- * This middleware handles Swagger logic
+ * This middleware handles Swagger logic which means
+ *
+ *   - It takes care of routing, and calls Swagger controllers (/api/controllers)
+ *   for each route;
+ *   - It validates both the request and the response, enforcing type checks on
+ *   both ends;
+ *   - It documents the API
+ *   - It serves as a nice UI for manual testing
  *
  * @module Middlewares/Swagger
  */
 "use strict";
 
-const lodash = require("lodash/fp");
+const {
+    get
+} = require("lodash/fp");
 const BPromise = require("bluebird");
 
 const swaggerTools = require("swagger-tools");
@@ -21,16 +30,15 @@ const swaggerTools = require("swagger-tools");
 exports.factory = (context) => new BPromise(
     function(resolve, reject) {
         try {
-            const get = lodash.get;
-            const config = get("config.swagger", context);
+            const log = context.utils.getLogger(context);
+            const getModulePath = context.utils.getModulePath;
 
-            const getLogger = get("utils.getLogger", context);
-            const log = getLogger(context);
+            const config = context.config.swagger;
 
-            const getModulePath = get("utils.getModulePath", context);
             const controllers = require(getModulePath("api/controllers"));
-            const spec = require(getModulePath("api/swagger.json"));
             const entityInstance = get("entities.factory", controllers)(context);
+
+            const spec = require(getModulePath("api/swagger.json"));
 
             log("info", "Adding Swagger middleware");
 

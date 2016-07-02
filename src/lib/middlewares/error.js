@@ -8,21 +8,20 @@
  */
 "use strict";
 
-const lodash = require("lodash/fp");
+const {
+    get
+} = require("lodash/fp");
 const BPromise = require("bluebird");
 
 /**
- * Initialize Error middleware
+ * Instanciate Error middleware
  * @param  {Object} context - Current context
  * @return {Promise<Function>} Error handler middleware function
  */
 exports.factory = function factory(context) {
     return BPromise
         .try(function() {
-            const get = lodash.get;
-            const getLogger = get("utils.getLogger", context);
-            const log = getLogger(context);
-
+            const log = context.utils.getLogger(context);
             const sendBack = get("utils.sendBack", context);
 
             log("info", "Adding Error handler");

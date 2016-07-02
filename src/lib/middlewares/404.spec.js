@@ -3,7 +3,7 @@
 const path = require("path");
 
 const {
-    t,
+    executeTests,
     prepareForTests,
     nullFn,
     nullFnHO,
@@ -12,29 +12,30 @@ const {
 
 const m = prepareForTests(__filename);
 
-t("Page Not Found Middleware", function(t) {
-
-    t("factory()", function(t) {
-        t.test("when there is an error", (t) =>
+executeTests("Page Not Found Middleware", [{
+    name: "factory()",
+    assertions: [{
+        when: "there is an error",
+        should: "return a rejected promise",
+        test: (test) => test((t) =>
             m({
                 utils: {
                     getLogger: throwFnHO
                 }
             }, {})
-            .catch(() => t.pass("should return a rejected promise"))
-        );
-        t.test("when there is no error", (t) =>
+            .catch(() => t.pass(""))
+        )
+    }, {
+        when: "there is no error",
+        should: "return a promise fulfilled with a middleware function",
+        test: (test) => test((t) =>
             m({
                 utils: {
                     getLogger: nullFnHO,
                     sendBack: nullFn
                 }
             }, {})
-            .then(function(fn) {
-                return fn(null, null, () =>
-                    t.pass("should return a promise fulfilled with a middleware function"));
-            })
-        );
-    });
-
-});
+            .then((fn) => fn(null, null, () => t.pass("")))
+        )
+    }]
+}]);

@@ -3,22 +3,31 @@
 const path = require("path");
 
 const {
-    t,
+    executeTests,
     prepareForTests,
     nullFn
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareForTests(__filename);
 
-t("Swagger Middleware", function(t) {
-
-    t("factory()", function(t) {
-        t.test("when there is an error", (t) =>
+executeTests("Swagger Middleware", [{
+    name: "factory()",
+    assertions: [{
+        when: "there is an error",
+        should: "return a rejected promise",
+        test: (test) => test((t) =>
             m({}, {})
-            .catch(() => t.pass("should return a rejected promise"))
-        );
-        t.test("when there is no error", (t) =>
-            m({}, {
+            .catch(() => t.pass(""))
+        )
+    }, {
+        when: "there is no error",
+        should: "return a promise fulfilled with an object",
+        test: (test) => test((t) =>
+            m({
+                config: {
+                    swagger: null
+                }
+            }, {
                 controllers: {
                     entities: {
                         factory: function() {
@@ -40,9 +49,7 @@ t("Swagger Middleware", function(t) {
             })
             .then((fn) => t.equal(
                 typeof fn,
-                "object",
-                "should return a promise fulfilled with an object"))
-        );
-    });
-
-});
+                "object"))
+        )
+    }]
+}]);

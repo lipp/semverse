@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * ### Entry point module
+ *
+ * This is where everything begins: We instanciate a new service and start it for
+ * everyone to see :3
+ *
+ * @module Main
+ */
+"use strict";
+
+const path = require("path");
+const express = require("express");
+
+const BPromise = require("bluebird");
+const {
+    get
+} = require("lodash/fp");
+
+const utils = require(path.resolve(__dirname, "lib/utils"));
+const config = require(path.resolve(__dirname, "config"));
+const middlewareLoader = require(path.resolve(__dirname, "lib/middlewares"));
+const modelLoader = require(path.resolve(__dirname, "models"));
+
+/**
+ * Instanciate Service starter
+ * @param  {Object} context - Current context
+ * @return {Object} Service starter instance
+ */
+exports.factory = function(context) {
+    const log = context.utils.getLogger();
+    const logAndResolve = context.utils.logAndResolve(log);
+    const logAndReject = context.utils.logAndReject(log);
+
+    const instance = {};
+
+    /**
+     * Add middlewares to the context
+     * @return {Promise&lt;Object>} Mutated context with middlewares
+     **/
+    instance.addMiddlewares = function() {
+        log("info", "Adding middlewares...");
+        return middlewareLoader
+            .factory(context)
+            .loadMiddlewares()
+            .then(logAndResolve("info", "Middlewares added"))
+            .catch(logAndReject("critical", "Fatal error while adding middlewares"));
+    };
+
+    /**
+     * Add models to the context
+     * @return {Promise&lt;Object>} Mutated context with models
+     **/
+    instance.addModels = function() {
+        log("info", "Adding models...");
+        return modelLoader
+            .factory(context)
+            .loadModels()
+            .then(logAndResolve("info", "Models added"))
+            .catch(logAndReject("critical", "Fatal error while adding models"));
+    };
+
+    /**
+     * Create a service instance with given context
+     * @return {Promise&lt;Object>} Mutated context with the new service
+     */
+    instance.createService = function() {
+        log("info", "Creating service instance...");
+        context.service = express();
+        return instance.addModels()
+            .then(() => instance.addMiddlewares())
+            .then(logAndResolve("info", "Service instance created"))
+            .catch(logAndReject("critical", "Fatal error while creating the service instance"));
+    };
+
+    /**
+     * Start a service instance
+     * @return {Promise&lt;Object>} Mutated context with started service
+     */
+    instance.startService = function() {
+        const service = context.service;
+        const port = get("config.service.port", context) || 9100;
+        log("info", `Starting service instance on port ${port}...`);
+        return new BPromise(function(resolve, reject) {
+                try {
+                    service.listen(port, (error) => (error) ?
+                        reject(error) :
+                        resolve());
+                } catch (error) {
+                    reject(error);
+                }
+            })
+            .then(logAndResolve("info", "Service instance successfully started"))
+            .catch(logAndReject("critical", "Error while starting the service instance"));
+    };
+
+    /**
+     * The holy function at the beginning of everything
+     * @return {Promise&lt;Object>} New context with a started service
+     **/
+    instance.main = function() {
+        log("info", "Hi ! Welcome to Semverse !");
+        log("info", "Please wait while I prepare everything :3");
+        return instance.createService()
+            .then(instance.startService)
+            .catch(logAndReject("critical", "Fatal error :("));
+    };
+
+    return instance;
+};
+
+// This section is only for service execution
+/* istanbul ignore if */
+if (process.env.NODE_ENV === "production") {
+    const context = {
+        utils: utils,
+        config: config
+    };
+    exports.factory(context).main();
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-API_Controllers_Entities.html">API/Controllers/Entities</a></li><li><a href="module-API_Controllers_Loader.html">API/Controllers/Loader</a></li><li><a href="module-Configuration_Default.html">Configuration/Default</a></li><li><a href="module-Configuration_Environment.html">Configuration/Environment</a></li><li><a href="module-Configuration_Loader.html">Configuration/Loader</a></li><li><a href="module-Library_Test-Helpers.html">Library/Test-Helpers</a></li><li><a href="module-Library_Utilities.html">Library/Utilities</a></li><li><a href="module-Main.html">Main</a></li><li><a href="module-Middlewares_404.html">Middlewares/404</a></li><li><a href="module-Middlewares_Error.html">Middlewares/Error</a></li><li><a href="module-Middlewares_Loader.html">Middlewares/Loader</a></li><li><a href="module-Middlewares_Swagger.html">Middlewares/Swagger</a></li><li><a href="module-Models_Entity.html">Models/Entity</a></li><li><a href="module-Models_Loader.html">Models/Loader</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Fri Jul 01 2016 08:26:00 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
