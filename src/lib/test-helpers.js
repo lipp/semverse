@@ -20,7 +20,8 @@ const {
     isFunction,
     keys,
     flow,
-    curry
+    curry,
+    defaultsDeep
 } = lodash;
 
 const BPromise = require("bluebird");
@@ -147,6 +148,7 @@ exports.createResponseMock = function() {
 // Node modules can also go here if they can (and should) be stubbed
 exports.bluebird = "bluebird";
 exports.swaggerTools = "swagger-tools";
+exports.lodash = "lodash/fp";
 
 const projectRoot = path.resolve(__dirname, "../");
 exports.config = path.join(projectRoot, "config");
@@ -166,10 +168,9 @@ const noCallThru = {
 const defaultStubs = {
     bluebird: BPromise,
     path: path,
-    lodash: lodash,
     proxyquire: proxyquire
 };
-
+defaultStubs[exports.lodash] = lodash;
 // Dependencies that have to be stubbed (no default)
 map(function(dep) {
     defaultStubs[dep] = noCallThru;
@@ -231,8 +232,8 @@ exports.convertIntoComputedProperties = function(object) {
 exports.requireWithStubs = (moduleName, customStubs) => proxyquire(
     moduleName,
     flow(
-        merge(exports.convertIntoComputedProperties(customStubs)),
-        merge(defaultStubs)
+        defaultsDeep(exports.convertIntoComputedProperties(customStubs)),
+        defaultsDeep(defaultStubs)
     )({})
 );
 
