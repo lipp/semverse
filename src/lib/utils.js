@@ -17,37 +17,20 @@ const {
 const BPromise = require("bluebird");
 
 // No logger module for the moment, so just dump everything into console
-exports.getLogger = () => console.log;
+exports.log = console.log;
 
 /**
  * Compute a module absolute path from its root based path
  * @param {String} relativePath - Module relative path from project root
  * @return {String} Module absolute path
  */
-exports.getModulePath = function getModulePath(relativePath) {
+exports.getModulePath = function(relativePath) {
     return path.join(path.resolve(__dirname, "../"), relativePath);
 };
 
 /**
- * Require a middleware, e.g. a module located in <project_root>/lib/middlewares
- * @param {String} moduleName - Module name
- * @return {Mixed} Module exports
- */
-exports.requireMiddleware = function requireMiddleware(moduleName) {
-    return require(exports.getModulePath(path.join("lib/middlewares", moduleName)));
-};
-
-/**
- * Require a model, e.g. a module located in <project_root>/models
- * @param {String} moduleName - Module name
- * @return {Mixed} Model exports
- */
-exports.requireModel = function requireModel(moduleName) {
-    return require(exports.getModulePath(path.join("models", moduleName)));
-};
-
-/**
  * @name sendBack
+ * @function
  * @description Mutate response
  * @curried
  * @param {Object} res - Response reference
@@ -55,7 +38,7 @@ exports.requireModel = function requireModel(moduleName) {
  * @param {Object} content - Content to be sent back
  * @return {Undefined} Nothing
  */
-exports.sendBack = curry(function sendBack(res, status, content) {
+exports.sendBack = curry(function(res, status, content) {
     if (isFunction(get("status", res)) && isFunction(get("json", res))) {
         res
             .status(status)
@@ -65,30 +48,30 @@ exports.sendBack = curry(function sendBack(res, status, content) {
 
 /**
  * @name logAndResolve
+ * @function
  * @description Log an error and resolve it again
  * @curried
- * @param {String} logFn - Log function
  * @param {String} level - Log level
  * @param {String} message - Message that will be logged
  * @param {Mixed} value - Value to be resolved with
  * @return {Promise<Mixed>} Same value
  */
-exports.logAndResolve = curry(function logAndResolve(logFn, level, message, value) {
-    logFn(level, message);
+exports.logAndResolve = curry(function(level, message, value) {
+    exports.log(level, message);
     return BPromise.resolve(value);
 });
 
 /**
  * @name logAndReject
+ * @function
  * @description Log an error and reject it again
  * @curried
- * @param {String} logFn - Log function
  * @param {String} level - Log level
  * @param {String} message - Message that will be logged
  * @param {Object} error - Error object
  * @return {Promise<Error>} Same error object
  */
-exports.logAndReject = curry(function logAndReject(logFn, level, message, error) {
-    logFn(level, message);
+exports.logAndReject = curry(function(level, message, error) {
+    exports.log(level, message);
     return BPromise.reject(error);
 });

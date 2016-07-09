@@ -15,12 +15,10 @@ const path = require("path");
 
 const lodash = require("lodash/fp");
 const {
-    merge,
     map,
-    isFunction,
     keys,
     flow,
-    curry
+    defaultsDeep
 } = lodash;
 
 const BPromise = require("bluebird");
@@ -44,19 +42,27 @@ exports.unitTest = (testFn, testDescription) => (cb) =>
  * description.
  * Descriptions will be concatenated to form a test statement that will have this
  * structure: "Module - Function(): When XXXXXXXXX, it should YYYYYYYYY
+ * @curried
+ * @param {String} mode - Execution mode(null = normal, skip, or only)
  * @param {String} moduleName - Tested module description
  * @param {Array<Object>} assertions - Assertion array to perform
  * @return {Array} Assertions execution results
  */
-exports.executeTests = (moduleName, functionBlocks) =>
-    map((fn) =>
+exports.executeTestsInternal = (mode) => (moduleName, functionBlocks) =>
+    map((fnObj) =>
         map(function(assert) {
-            const description = `${moduleName} - ${fn.name}: when ${assert.when}, it should ${assert.should}`;
+            const description = `${moduleName} - ${fnObj.name}: when ${assert.when}, it should ${assert.should}`;
             const newTest = exports.unitTest(tape, description);
             newTest.skip = exports.unitTest(tape.skip, description);
             newTest.only = exports.unitTest(tape.only, description);
+            // istanbul ignore if
+            if (mode === "skip" || fnObj.skip) {
+                return assert.test(newTest.skip);
+            }
             return assert.test(newTest);
-        }, fn.assertions), functionBlocks);
+        }, fnObj.assertions), functionBlocks);
+exports.executeTests = exports.executeTestsInternal();
+exports.executeTests.skip = exports.executeTestsInternal("skip");
 
 /**
  * Identity function
@@ -147,12 +153,13 @@ exports.createResponseMock = function() {
 // Node modules can also go here if they can (and should) be stubbed
 exports.bluebird = "bluebird";
 exports.swaggerTools = "swagger-tools";
+exports.lodash = "lodash/fp";
 
 const projectRoot = path.resolve(__dirname, "../");
 exports.config = path.join(projectRoot, "config");
 exports.utils = path.join(projectRoot, "lib/utils");
-exports.middlewareLoader = path.join(projectRoot, "lib/middlewares");
-exports.modelLoader = path.join(projectRoot, "models");
+exports.middlewares = path.join(projectRoot, "lib/middlewares");
+exports.models = path.join(projectRoot, "models");
 exports.entity = path.join(projectRoot, "models/entity");
 exports.controllers = path.join(projectRoot, "api/controllers");
 
@@ -166,9 +173,17 @@ const noCallThru = {
 const defaultStubs = {
     bluebird: BPromise,
     path: path,
-    lodash: lodash,
     proxyquire: proxyquire
 };
+defaultStubs[exports.utils] = {
+    log: exports.nullFn,
+    logAndResolve: exports.resolveFnHO,
+    logAndReject: exports.rejectFnHO,
+    // All other utils functions are allowed because they are related to module
+    // loading and path abstraction
+    "@noCallThru": false
+};
+defaultStubs[exports.lodash] = lodash;
 
 // Dependencies that have to be stubbed (no default)
 map(function(dep) {
@@ -179,31 +194,20 @@ map(function(dep) {
     "express",
     exports.swaggerTools,
     exports.config,
-    exports.utils,
-    exports.middlewareLoader,
-    exports.modelLoader,
+    exports.middlewares,
+    exports.models,
     exports.entity,
     exports.controllers
 ]);
 
-// Defaults stubs that will be used for instance factories
-const defaultContext = {
-    utils: {
-        getLogger: exports.nullFnHO,
-        getModulePath: require(exports.utils).getModulePath,
-        logAndResolve: () => exports.resolveFnHO,
-        logAndReject: () => exports.rejectFnHO
-    }
-};
-
 /**
  * Convert an object into another object with computed properties by using the given
- * object properties names as variables declared in this module
- * For example, given an object { a: "foo", b: "bar" }
- * this function will return an object { [a]: "foo", [b]: "bar" } with a and b
- * eventually defined as variables in this module.
+ * object properties names as variables declared in this module.
  * If they are not defined, this function will assume that they refer to node
  * modules instead of local ones during the computed property resolution.
+ * @example Given an object { a: "foo", b: "bar" }
+ * this function will return an object { [a]: "foo", [b]: "bar" } with a and b
+ * eventually defined as variables in this module.
  * @param  {Object} object - Input object
  * @return {Object} Converted object
  */
@@ -228,46 +232,30 @@ exports.convertIntoComputedProperties = function(object) {
  * @param {Object} customStubs - Custom stubs for the proxified module
  * @return {Mixed} Proxified module
  */
-exports.requireWithStubs = (moduleName, customStubs) => proxyquire(
-    moduleName,
-    flow(
-        merge(exports.convertIntoComputedProperties(customStubs)),
-        merge(defaultStubs)
-    )({})
-);
-
-/**
- * Create a new instance from a given module factory with a fake context
- * @param {Object} module - Module object
- * @param {Object} customContext - Custom context for the module factory
- * @return {Mixed} New instance
- */
-exports.createInstance = (module, customContext) => module.factory(
-    flow(
-        merge(customContext),
-        merge(defaultContext)
-    )({})
-);
+exports.requireWithStubs = function(moduleName, customStubs) {
+    const stubs = flow(
+        defaultsDeep(exports.convertIntoComputedProperties(customStubs)),
+        defaultsDeep(defaultStubs)
+    )({});
+    return proxyquire(
+        moduleName,
+        stubs
+    );
+};
 
 /**
  * @name prepareForTests
- * @description Prepare a module for tests by requiring it with stubs and
- * eventually creating an instance from its factory if it has any.
+ * @function
+ * @description Prepare a module for tests by requiring it with stubs
  * Module name is based on the given test file name that
  * will consume the prepared module.
  * @curried
  * @param {String} testFileName - Test file name
- * @param {Object} customContext - Custom context for the proxified module
- * factory, if it has one. Ignored if the module has no factory
  * @param {Object} customStubs - Custom stubs for the proxified module
- * @return {Mixed} Proxified module, or proxified module instance if the
- * module has a factory
+ * @return {Mixed} Proxified module
  */
-exports.prepareForTests = curry(function(testFileName, customContext, customStubs) {
-    const moduleName = testFileName.replace(".spec", "");
-    const module = exports.requireWithStubs(moduleName, customStubs);
-    if (isFunction(module.factory)) {
-        return exports.createInstance(module, customContext);
-    }
-    return module;
-});
+exports.prepareForTests = (testFileName) => (customStubs) =>
+    exports.requireWithStubs(
+        testFileName.replace(".spec", ""),
+        customStubs
+    );

@@ -7,11 +7,15 @@
  * @module Configuration/Loader
  */
 "use strict";
-const lodash = require("lodash");
+const {
+    flow,
+    defaultsDeep
+} = require("lodash/fp");
 
 const configDefault = require("./default");
 const configEnvironment = require("./environment");
 
-module.exports = lodash.merge({},
-configDefault,
-configEnvironment);
+module.exports = flow(
+    defaultsDeep(configEnvironment),
+    defaultsDeep(configDefault)
+)({});

@@ -6,6 +6,17 @@
  * @module Configuration/Environment
  */
 "use strict";
-module.exports = {
-    // TBD
-};
+
+const {
+    get
+} = require("lodash/fp");
+
+exports.get = (variable) => get(variable, process.env);
+
+// This section is only for service execution
+/* istanbul ignore if */
+if (process.env.NODE_ENV === "production") {
+    exports.service = {
+        port: exports.get('PORT')
+    };
+}

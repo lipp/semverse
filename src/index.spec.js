@@ -20,11 +20,9 @@ executeTests("Service starter", [{
         when: "there is an error",
         should: "return a rejected Promise",
         test: (test) => test((t) =>
-            m({}, {
-                middlewareLoader: {
-                    factory: () => ({
-                        loadMiddlewares: rejectFn
-                    })
+            m({
+                middlewares: {
+                    loadMiddlewares: rejectFn
                 }
             })
             .addMiddlewares()
@@ -34,45 +32,12 @@ executeTests("Service starter", [{
         when: "there are no error",
         should: "return a resolved Promise",
         test: (test) => test((t) =>
-            m({}, {
-                middlewareLoader: {
-                    factory: () => ({
-                        loadMiddlewares: resolveFn
-                    })
+            m({
+                middlewares: {
+                    loadMiddlewares: resolveFn
                 }
             })
             .addMiddlewares()
-            .then(() => t.pass(""))
-        )
-    }]
-}, {
-    name: "addModels()",
-    assertions: [{
-        when: "there is an error",
-        should: "return a rejected Promise",
-        test: (test) => test((t) =>
-            m({}, {
-                modelLoader: {
-                    factory: () => ({
-                        loadModels: rejectFn
-                    })
-                }
-            })
-            .addModels()
-            .catch(() => t.pass(""))
-        )
-    }, {
-        when: "there are no error",
-        should: "return a resolved Promise",
-        test: (test) => test((t) =>
-            m({}, {
-                modelLoader: {
-                    factory: () => ({
-                        loadModels: resolveFn
-                    })
-                }
-            })
-            .addModels()
             .then(() => t.pass(""))
         )
     }]
@@ -82,31 +47,29 @@ executeTests("Service starter", [{
         when: "there is an error",
         should: "return a rejected Promise",
         test: (test) => test(function(t) {
-            const testModule = m({}, {
+            const testModule = m({
                 express: nullFn
             });
-            stub(testModule, "addModels", rejectFn);
+            stub(testModule, "addMiddlewares", rejectFn);
             return testModule
                 .createService()
                 .catch(() => t.pass(""))
                 .finally(function() {
-                    testModule.addModels.restore();
+                    testModule.addMiddlewares.restore();
                 });
         })
     }, {
         when: "there are no errors",
         should: "return a resolved Promise",
         test: (test) => test(function(t) {
-            const testModule = m({}, {
+            const testModule = m({
                 express: nullFn
             });
-            stub(testModule, "addModels", resolveFn);
             stub(testModule, "addMiddlewares", resolveFn);
             return testModule
                 .createService()
                 .then(() => t.pass(""))
                 .finally(function() {
-                    testModule.addModels.restore();
                     testModule.addMiddlewares.restore();
                 });
         })
@@ -117,36 +80,42 @@ executeTests("Service starter", [{
         when: "the service cannot be started",
         should: "return a rejected Promise",
         test: (test) => test((t) =>
-            m({
+            m({})
+            .startService({
                 service: {
-                    listen: throwFn
+                    port: 0
                 }
-            }, {})
-            .startService()
+            }, {
+                listen: throwFn
+            })
             .catch(() => t.pass(""))
         )
     }, {
         when: "the service crashes while starting",
         should: "return a rejected Promise",
         test: (test) => test((t) =>
-            m({
+            m({})
+            .startService({
                 service: {
-                    listen: (ignore, cb) => cb(new Error("foo"))
+                    port: 0
                 }
-            }, {})
-            .startService()
+            }, {
+                listen: (ignore, cb) => cb(new Error("foo"))
+            })
             .catch(() => t.pass(""))
         )
     }, {
         when: "the service starts successfully",
         should: "return a resolved Promise",
         test: (test) => test((t) =>
-            m({
+            m({})
+            .startService({
                 service: {
-                    listen: (ignore, cb) => cb()
+                    port: 0
                 }
-            }, {})
-            .startService()
+            }, {
+                listen: (ignore, cb) => cb()
+            })
             .then(() => t.pass(""))
         )
     }]
@@ -156,7 +125,7 @@ executeTests("Service starter", [{
         when: "there is an error",
         should: "return a rejected Promise",
         test: (test) => test(function(t) {
-            const testModule = m({}, {});
+            const testModule = m({});
             stub(testModule, "createService", rejectFn);
             return testModule
                 .main()
@@ -167,7 +136,7 @@ executeTests("Service starter", [{
         when: "there are no error",
         should: "return a resolved Promise",
         test: (test) => test(function(t) {
-            const testModule = m({}, {});
+            const testModule = m({});
             stub(testModule, "createService", resolveFn);
             stub(testModule, "startService", resolveFn);
             return testModule

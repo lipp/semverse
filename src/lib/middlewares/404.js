@@ -9,27 +9,23 @@
  */
 "use strict";
 
+const path = require("path");
+
 const {
     get
 } = require("lodash/fp");
-const BPromise = require("bluebird");
 
-/**
- * Instanciate PageNotFound middleware
- * This simple middleware will answer to any request with a 404 error
- * @param  {Object} context - Current context
- * @return {Promise<Function>} PageNotFound middleware function
- */
-exports.factory = (context) => BPromise
-    .try(function() {
-        const log = context.utils.getLogger(context);
-        const sendBack = context.utils.sendBack;
+const utils = require(path.resolve(__dirname, "../utils"));
+const log = utils.log;
+const sendBack = utils.sendBack;
 
-        log("info", "Adding PageNotFound handler");
+log("info", "Adding PageNotFound handler");
 
-        return function pageNotFoundMiddleware(req, res, next) {
-            log("error", `A request tried to access an unknown page: ${get("method", req)} ${get("path", req)}`);
-            sendBack(res, 404);
-            next();
-        };
-    });
+module.exports = function(req, res, next) {
+    log(
+        "error",
+        `Unknown route: ${get("method", req)} ${get("path", req)}`
+    );
+    sendBack(res, 404);
+    next();
+};

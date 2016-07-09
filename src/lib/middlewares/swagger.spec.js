@@ -11,12 +11,12 @@ const {
 const m = prepareForTests(__filename);
 
 executeTests("Swagger Middleware", [{
-    name: "factory()",
+    name: "module.exports()",
     assertions: [{
         when: "there is an error",
         should: "return a rejected promise",
         test: (test) => test((t) =>
-            m({}, {})
+            m({})
             .catch(() => t.pass(""))
         )
     }, {
@@ -26,16 +26,11 @@ executeTests("Swagger Middleware", [{
             m({
                 config: {
                     swagger: null
-                }
-            }, {
+                },
                 controllers: {
                     entities: {
-                        factory: function() {
-                            return {
-                                listEntities: null,
-                                createEntity: null
-                            };
-                        }
+                        listEntities: null,
+                        createEntity: null
                     }
                 },
                 swaggerTools: {

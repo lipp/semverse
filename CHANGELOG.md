@@ -1,5 +1,15 @@
 [NEXT VERSION]
 
+[6.0.0]
+### The Refactor update (part 2)
+
+Well, there goes my context aware modules. I realized that moving around my context reference lead to function signature obfuscation, worthless complexity, and...bugs. So I got rid of it, came back to simpler, more abstract modules, so that the next iterations will go smoother and the code be cleaner.
+
+Changes are:
+- [REFACTOR]: Rewrote the codebase to be context unaware, the functions to be as pure as possible (more improvements later), and the logs to be anonymous
+- [FEATURE]: Add environment variables based configuration, to fix Heroku deploys
+- [FEATURE]: Tests can now be skipped per module (Use ```executeTests.skip```)
+- [FEATURE]: Tests can now be skipped per function (Add ```skip: true``` in function tests definitions)
 
 [5.0.0]
 ### The Refactor update

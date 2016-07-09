@@ -10,110 +10,81 @@
 
 const path = require("path");
 const express = require("express");
-
 const BPromise = require("bluebird");
-const {
-    get
-} = require("lodash/fp");
 
 const utils = require(path.resolve(__dirname, "lib/utils"));
+
+const log = utils.log;
+const logAndResolve = utils.logAndResolve;
+const logAndReject = utils.logAndReject;
+
 const config = require(path.resolve(__dirname, "config"));
-const middlewareLoader = require(path.resolve(__dirname, "lib/middlewares"));
-const modelLoader = require(path.resolve(__dirname, "models"));
+const middlewares = require(path.resolve(__dirname, "lib/middlewares"));
 
 /**
- * Instanciate Service starter
- * @param  {Object} context - Current context
- * @return {Object} Service starter instance
+ * Add middlewares to the context
+ * @param {Object} config - Current config
+ * @param {Object} service - Service reference
+ * @return {Promise<Object>} Mutated with middlewares
+ **/
+exports.addMiddlewares = function(config, service) {
+    log("info", "Adding middlewares...");
+    return middlewares
+        .loadMiddlewares(config, service)
+        .then(logAndResolve("info", "Middlewares added"))
+        .catch(logAndReject("critical", "Fatal error while adding middlewares"));
+};
+
+/**
+ * Create a service exports with given context
+ * @param {Object} config - Current config
+ * @return {Promise<Object>} New service having models and middlewares
  */
-exports.factory = function(context) {
-    const log = context.utils.getLogger();
-    const logAndResolve = context.utils.logAndResolve(log);
-    const logAndReject = context.utils.logAndReject(log);
+exports.createService = function(config) {
+    log("info", "Creating service instance...");
+    const service = express();
+    return exports.addMiddlewares(config, service)
+        .then(() => logAndResolve("info", "Service instance created", service))
+        .catch(logAndReject("critical", "Fatal error while creating the service instance"));
+};
 
-    const instance = {};
+/**
+ * Start a service exports
+ * @param {Object} config - Config reference
+ * @param {Object} service - Service reference
+ * @return {Promise<Object>} Started service
+ */
+exports.startService = function(config, service) {
+    const port = config.service.port;
+    log("info", `Starting service exports on port ${port}...`);
+    return new BPromise(function(resolve, reject) {
+            try {
+                service.listen(port, (error) => (error) ?
+                    reject(error) :
+                    resolve());
+            } catch (error) {
+                reject(error);
+            }
+        })
+        .then(logAndResolve("info", "Service exports successfully started"))
+        .catch(logAndReject("critical", "Error while starting the service exports"));
+};
 
-    /**
-     * Add middlewares to the context
-     * @return {Promise<Object>} Mutated context with middlewares
-     **/
-    instance.addMiddlewares = function() {
-        log("info", "Adding middlewares...");
-        return middlewareLoader
-            .factory(context)
-            .loadMiddlewares()
-            .then(logAndResolve("info", "Middlewares added"))
-            .catch(logAndReject("critical", "Fatal error while adding middlewares"));
-    };
-
-    /**
-     * Add models to the context
-     * @return {Promise<Object>} Mutated context with models
-     **/
-    instance.addModels = function() {
-        log("info", "Adding models...");
-        return modelLoader
-            .factory(context)
-            .loadModels()
-            .then(logAndResolve("info", "Models added"))
-            .catch(logAndReject("critical", "Fatal error while adding models"));
-    };
-
-    /**
-     * Create a service instance with given context
-     * @return {Promise<Object>} Mutated context with the new service
-     */
-    instance.createService = function() {
-        log("info", "Creating service instance...");
-        context.service = express();
-        return instance.addModels()
-            .then(() => instance.addMiddlewares())
-            .then(logAndResolve("info", "Service instance created"))
-            .catch(logAndReject("critical", "Fatal error while creating the service instance"));
-    };
-
-    /**
-     * Start a service instance
-     * @return {Promise<Object>} Mutated context with started service
-     */
-    instance.startService = function() {
-        const service = context.service;
-        const port = get("config.service.port", context) || 9100;
-        log("info", `Starting service instance on port ${port}...`);
-        return new BPromise(function(resolve, reject) {
-                try {
-                    service.listen(port, (error) => (error) ?
-                        reject(error) :
-                        resolve());
-                } catch (error) {
-                    reject(error);
-                }
-            })
-            .then(logAndResolve("info", "Service instance successfully started"))
-            .catch(logAndReject("critical", "Error while starting the service instance"));
-    };
-
-    /**
-     * The holy function at the beginning of everything
-     * @return {Promise<Object>} New context with a started service
-     **/
-    instance.main = function() {
-        log("info", "Hi ! Welcome to Semverse !");
-        log("info", "Please wait while I prepare everything :3");
-        return instance.createService()
-            .then(instance.startService)
-            .catch(logAndReject("critical", "Fatal error :("));
-    };
-
-    return instance;
+/**
+ * The holy function at the beginning of everything
+ * @param {Object} config - Current configuration
+ * @return {Promise<Object>} Started service
+ **/
+exports.main = function(config) {
+    log("info", "Hi ! Welcome to Semverse !");
+    log("info", "Please wait while I prepare everything :3");
+    return exports.createService(config)
+        .then((service) => exports.startService(config, service))
+        .catch(logAndReject("critical", "Fatal error :("));
 };
 
 // This section is only for service execution
 /* istanbul ignore if */
 if (process.env.NODE_ENV === "production") {
-    const context = {
-        utils: utils,
-        config: config
-    };
-    exports.factory(context).main();
+    exports.main(config);
 }

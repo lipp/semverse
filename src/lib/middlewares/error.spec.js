@@ -4,39 +4,32 @@ const path = require("path");
 
 const {
     executeTests,
-    prepareForTests,
-    nullFn,
-    nullFnHO,
-    throwFnHO
+    prepareForTests
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareForTests(__filename);
 
 executeTests("Error Middleware", [{
-    name: "factory()",
+    name: "module.exports()",
     assertions: [{
-        when: "there is an error",
-        should: "return a rejected promise",
-        test: (test) => test((t) =>
+        when: "...everytime",
+        should: "mutate the response",
+        test: (test) => test(function(t) {
+            t.plan(3);
+            const res = {};
             m({
-                utils: {
-                    getLogger: throwFnHO
-                }
-            }, {})
-            .catch(() => t.pass(""))
-        )
-    }, {
-        when: "there is no error",
-        should: "return a promise fulfilled with an Express Error Middleware",
-        test: (test) => test((t) =>
-            m({
-                utils: {
-                    getLogger: nullFnHO,
-                    sendBack: nullFn
-                }
-            }, {})
-            .then((fn) => fn("foo", null, null, (a) => t.equal(a, "foo",
-                "")))
-        )
+                    utils: {
+                        sendBack: function(a) {
+                            a.status = 500;
+                            a.body = "foo";
+                        }
+                    }
+                })
+                ("bar", null, res, function(err) {
+                    t.equal(err, "bar");
+                    t.equal(res.status, 500);
+                    t.equal(res.body, "foo");
+                });
+        })
     }]
 }]);
