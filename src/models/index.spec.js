@@ -19,7 +19,7 @@ executeTests("Model loader", [{
         when: "an error happens",
         should: "return a rejected Promise",
         test: (test) => test((t) =>
-            m({}, {
+            m({
                 fs: {
                     readdir: (ignore, cb) => cb(new Error('foo'))
                 }
@@ -31,7 +31,7 @@ executeTests("Model loader", [{
         when: "no error happens",
         should: "return a promise fulfilled with a array of .js files only",
         test: (test) => test((t) =>
-            m({}, {
+            m({
                 fs: {
                     readdir: (ignore, cb) => cb(null, ["foo.js", "bar.spec.js", "baz.md"])
                 }
@@ -47,7 +47,7 @@ executeTests("Model loader", [{
         when: "there is an error",
         should: "return a rejected promise",
         test: (test) => test(function(t) {
-            const testModule = m({}, {});
+            const testModule = m({});
             stub(testModule, "retrieveModels", rejectFn);
             return testModule
                 .loadModels()
@@ -64,7 +64,7 @@ executeTests("Model loader", [{
                 utils: {
                     requireModel: nullFn
                 }
-            }, {});
+            });
             stub(testModule, "retrieveModels", resolveFnHO([]));
             return testModule
                 .loadModels()
@@ -80,15 +80,10 @@ executeTests("Model loader", [{
             const testModule = m({
                 utils: {
                     requireModel: () => ({
-                        factory: () => ({
-                            name: "foo"
-                        })
+                        name: "foo"
                     })
-                }
-            }, {
-                entity: {
-                    factory: nullFn
-                }
+                },
+                entity: {}
             });
             stub(testModule, "retrieveModels", resolveFnHO(['entity']));
             return testModule

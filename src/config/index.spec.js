@@ -8,7 +8,7 @@ const {
     resolveFn
 } = require(path.resolve("src/lib/test-helpers"));
 
-const m = prepareForTests(__filename, null);
+const m = prepareForTests(__filename);
 
 executeTests("Config loader", [{
     name: "listEntities()",

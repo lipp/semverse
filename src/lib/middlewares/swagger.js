@@ -14,51 +14,49 @@
  */
 "use strict";
 
+const path = require("path");
+
 const {
     get
 } = require("lodash/fp");
 const BPromise = require("bluebird");
-
 const swaggerTools = require("swagger-tools");
 
+const utils = require(path.resolve(__dirname, "../utils"));
+const log = utils.log;
+const getModulePath = utils.getModulePath;
 
-/**
- * Initialize Swagger Middleware
- * @param  {Object} context - Current context
- * @return {Promise<Array>} Swagger Middleware functions list
- */
-exports.factory = (context) => new BPromise(
+const config = require(getModulePath("config")).swagger;
+
+const controllers = require(getModulePath("api/controllers"));
+const entity = controllers.entities;
+
+const spec = require(getModulePath("api/swagger.json"));
+
+log("info", "Adding Swagger middleware");
+
+module.exports = new BPromise(
     function(resolve, reject) {
         try {
-            const log = context.utils.getLogger(context);
-            const getModulePath = context.utils.getModulePath;
-
-            const config = context.config.swagger;
-
-            const controllers = require(getModulePath("api/controllers"));
-            const entityInstance = get("entities.factory", controllers)(context);
-
-            const spec = require(getModulePath("api/swagger.json"));
-
-            log("info", "Adding Swagger middleware");
-
-            swaggerTools.initializeMiddleware(spec, (swaggerMiddleware) => resolve([
-                swaggerMiddleware.swaggerMetadata(),
-                swaggerMiddleware.swaggerValidator({
-                    validateResponse: get("validateResponse", config) || true
-                }),
-                swaggerMiddleware.swaggerRouter({
-                    useStubs: get("useStubs", config) || false,
-                    controllers: {
-                        entities_listEntities: entityInstance.listEntities,
-                        entities_createEntity: entityInstance.createEntity
-                    }
-                }),
-                swaggerMiddleware.swaggerUi({
-                    apiDocs: get("apiDocs", config) || "/api-spec",
-                    swaggerUI: get("swaggerUI", config) || "/docs"
-                })
-            ]));
+            swaggerTools.initializeMiddleware(
+                spec, (swaggerMiddleware) => resolve([
+                    swaggerMiddleware.swaggerMetadata(),
+                    swaggerMiddleware.swaggerValidator({
+                        validateResponse: get("validateResponse", config) || true
+                    }),
+                    swaggerMiddleware.swaggerRouter({
+                        useStubs: get("useStubs", config) || false,
+                        controllers: {
+                            entities_listEntities: entity.listEntities,
+                            entities_createEntity: entity.createEntity
+                        }
+                    }),
+                    swaggerMiddleware.swaggerUi({
+                        apiDocs: get("apiDocs", config) || "/api-spec",
+                        swaggerUI: get("swaggerUI", config) || "/docs"
+                    })
+                ])
+            );
         } catch (error) {
             reject(error);
         }
