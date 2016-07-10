@@ -16,7 +16,7 @@ executeTests("API Controller Loader", [{
         when: "...actually everytime",
         should: "return an object",
         test: (test) => test((t) => resolveFn(
-            t.equal(typeof(m({}, {})),
+            t.equal(typeof(m({})),
                 "object")
         ))
     }]

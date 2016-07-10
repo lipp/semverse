@@ -4,38 +4,30 @@ const path = require("path");
 
 const {
     executeTests,
-    prepareForTests,
-    nullFn,
-    nullFnHO,
-    throwFnHO
+    prepareForTests
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareForTests(__filename);
 
 executeTests("Page Not Found Middleware", [{
-    name: "factory()",
+    name: "module.exports()",
     assertions: [{
-        when: "there is an error",
-        should: "return a rejected promise",
-        test: (test) => test((t) =>
+        when: "...everytime",
+        should: "mutate response status",
+        test: (test) => test(function(t) {
+            t.plan(2);
+            const res = {};
             m({
-                utils: {
-                    getLogger: throwFnHO
-                }
-            }, {})
-            .catch(() => t.pass(""))
-        )
-    }, {
-        when: "there is no error",
-        should: "return a promise fulfilled with a middleware function",
-        test: (test) => test((t) =>
-            m({
-                utils: {
-                    getLogger: nullFnHO,
-                    sendBack: nullFn
-                }
-            }, {})
-            .then((fn) => fn(null, null, () => t.pass("")))
-        )
+                    utils: {
+                        sendBack: function(a) {
+                            a.status = 404;
+                        }
+                    }
+                })
+                (null, res, function(err) {
+                    t.equal(err, undefined);
+                    t.equal(res.status, 404);
+                });
+        })
     }]
 }]);

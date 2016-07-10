@@ -6,7 +6,8 @@ const {
     executeTests,
     prepareForTests,
     nullFn,
-    throwFn
+    throwFn,
+    resolveFn
 } = require(path.resolve("src/lib/test-helpers"));
 
 const m = prepareForTests(__filename);
@@ -22,11 +23,13 @@ executeTests("Entities API Controller", [{
                     sendBack: throwFn
                 },
                 models: {
-                    entity: {
-                        getAll: nullFn
-                    }
+                    models: resolveFn({
+                        entity: {
+                            getAll: nullFn
+                        }
+                    })
                 }
-            }, {}).listEntities()
+            }).listEntities()
             .catch(() => t.pass(""))
         )
     }, {
@@ -38,11 +41,13 @@ executeTests("Entities API Controller", [{
                     sendBack: nullFn
                 },
                 models: {
-                    entity: {
-                        getAll: nullFn
-                    }
+                    models: resolveFn({
+                        entity: {
+                            getAll: nullFn
+                        }
+                    })
                 }
-            }, {}).listEntities()
+            }).listEntities()
             .then(() => t.pass(""))
         )
     }]
@@ -57,11 +62,13 @@ executeTests("Entities API Controller", [{
                     sendBack: throwFn
                 },
                 models: {
-                    entity: {
-                        getAll: nullFn
-                    }
+                    models: resolveFn({
+                        entity: {
+                            create: nullFn
+                        }
+                    })
                 }
-            }, {}).createEntity()
+            }).createEntity()
             .catch(() => t.pass(""))
         )
     }, {
@@ -73,11 +80,13 @@ executeTests("Entities API Controller", [{
                     sendBack: nullFn
                 },
                 models: {
-                    entity: {
-                        create: nullFn
-                    }
+                    models: resolveFn({
+                        entity: {
+                            create: nullFn
+                        }
+                    })
                 }
-            }, {}).createEntity()
+            }).createEntity()
             .then(() => t.pass(""))
         )
     }]

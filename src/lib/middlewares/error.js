@@ -8,29 +8,21 @@
  */
 "use strict";
 
+const path = require("path");
+
 const {
     get
 } = require("lodash/fp");
-const BPromise = require("bluebird");
 
-/**
- * Instanciate Error middleware
- * @param  {Object} context - Current context
- * @return {Promise<Function>} Error handler middleware function
- */
-exports.factory = function factory(context) {
-    return BPromise
-        .try(function() {
-            const log = context.utils.getLogger(context);
-            const sendBack = get("utils.sendBack", context);
+const utils = require(path.resolve(__dirname, "../utils"));
+const log = utils.log;
+const sendBack = utils.sendBack;
 
-            log("info", "Adding Error handler");
+log("info", "Adding Error handler");
 
-            return function errorMiddleware(error, req, res, next) {
-                log("error", `An error has not been handled internally ${get("stack", error)}`);
-                log("error", `Request was ${get("method", req)} ${get("path", req)}`);
-                sendBack(res, 500, error);
-                next(error);
-            };
-        });
+module.exports = function(error, req, res, next) {
+    log("error", `An error has not been handled internally ${get("stack", error)}`);
+    log("error", `Request was ${get("method", req)} ${get("path", req)}`);
+    sendBack(res, 500, error);
+    next(error);
 };

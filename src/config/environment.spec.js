@@ -11,25 +11,25 @@ const {
 const m = prepareForTests(__filename);
 
 executeTests("Environment Config loader", [{
-    name: "env()",
+    name: "get()",
     assertions: [{
         when: "an environment variable is not declared",
         should: "return undefined",
         test: (test) => test((t) => resolveFn(
             t.equal(
-                m({}, {
+                m({
                     lodash: {
                         get: () => undefined
                     }
                 }).get(),
                 undefined)
         ))
-    },{
+    }, {
         when: "an environment variable is declared",
         should: "return it",
         test: (test) => test((t) => resolveFn(
             t.equal(
-                m({}, {
+                m({
                     lodash: {
                         get: () => "foo"
                     }
