@@ -23,8 +23,10 @@ const utils = require(path.resolve(__dirname, "../utils"));
 const log = utils.log;
 const logAndResolve = utils.logAndResolve;
 const logAndReject = utils.logAndReject;
+
 /**
  * @name registerMiddleware
+ * @function
  * @description Register a middleware
  * @curried
  * @param  {Object} service - service reference

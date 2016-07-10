@@ -202,12 +202,12 @@ map(function(dep) {
 
 /**
  * Convert an object into another object with computed properties by using the given
- * object properties names as variables declared in this module
- * For example, given an object { a: "foo", b: "bar" }
- * this function will return an object { [a]: "foo", [b]: "bar" } with a and b
- * eventually defined as variables in this module.
+ * object properties names as variables declared in this module.
  * If they are not defined, this function will assume that they refer to node
  * modules instead of local ones during the computed property resolution.
+ * @example Given an object { a: "foo", b: "bar" }
+ * this function will return an object { [a]: "foo", [b]: "bar" } with a and b
+ * eventually defined as variables in this module.
  * @param  {Object} object - Input object
  * @return {Object} Converted object
  */
@@ -245,6 +245,7 @@ exports.requireWithStubs = function(moduleName, customStubs) {
 
 /**
  * @name prepareForTests
+ * @function
  * @description Prepare a module for tests by requiring it with stubs
  * Module name is based on the given test file name that
  * will consume the prepared module.

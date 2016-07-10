@@ -24,12 +24,13 @@ exports.log = console.log;
  * @param {String} relativePath - Module relative path from project root
  * @return {String} Module absolute path
  */
-exports.getModulePath = function (relativePath) {
+exports.getModulePath = function(relativePath) {
     return path.join(path.resolve(__dirname, "../"), relativePath);
 };
 
 /**
  * @name sendBack
+ * @function
  * @description Mutate response
  * @curried
  * @param {Object} res - Response reference
@@ -37,7 +38,7 @@ exports.getModulePath = function (relativePath) {
  * @param {Object} content - Content to be sent back
  * @return {Undefined} Nothing
  */
-exports.sendBack = curry(function (res, status, content) {
+exports.sendBack = curry(function(res, status, content) {
     if (isFunction(get("status", res)) && isFunction(get("json", res))) {
         res
             .status(status)
@@ -47,6 +48,7 @@ exports.sendBack = curry(function (res, status, content) {
 
 /**
  * @name logAndResolve
+ * @function
  * @description Log an error and resolve it again
  * @curried
  * @param {String} level - Log level
@@ -54,13 +56,14 @@ exports.sendBack = curry(function (res, status, content) {
  * @param {Mixed} value - Value to be resolved with
  * @return {Promise<Mixed>} Same value
  */
-exports.logAndResolve = curry(function (level, message, value) {
+exports.logAndResolve = curry(function(level, message, value) {
     exports.log(level, message);
     return BPromise.resolve(value);
 });
 
 /**
  * @name logAndReject
+ * @function
  * @description Log an error and reject it again
  * @curried
  * @param {String} level - Log level
@@ -68,7 +71,7 @@ exports.logAndResolve = curry(function (level, message, value) {
  * @param {Object} error - Error object
  * @return {Promise<Error>} Same error object
  */
-exports.logAndReject = curry(function (level, message, error) {
+exports.logAndReject = curry(function(level, message, error) {
     exports.log(level, message);
     return BPromise.reject(error);
 });
